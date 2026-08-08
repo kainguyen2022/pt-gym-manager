@@ -1490,7 +1490,7 @@ function initDB() {
         const data = localStorage.getItem(getDBName());
         if (!data) {
             const initialData = {
-                clients: [],
+                clients: isGuestModeEnabled() ? getSampleClients() : [],
                 sessions: getSampleSessions(),
                 exercises: getSampleExercises(),
                 programs: [],
@@ -1505,6 +1505,7 @@ function initDB() {
         if (!parsed.measurements) parsed.measurements = [];
         if (!parsed.notifications) parsed.notifications = [];
         if (!parsed.clients) parsed.clients = [];
+        if (isGuestModeEnabled() && parsed.clients.length === 0) parsed.clients = getSampleClients();
         if (!parsed.sessions) parsed.sessions = [];
         if (!parsed.exercises || parsed.exercises.length === 0) {
             parsed.exercises = getSampleExercises();
@@ -1698,7 +1699,13 @@ function getSampleClients() {
         { id: 'client_1', name: 'Nguyễn Minh Tuấn', age: 28, phone: '0912345678', email: 'minhtuan@gmail.com', height: 175, goals: 'Tăng cơ, giảm mỡ', package: 'vip', sessionsRemaining: 36, sessionsCompleted: 12, startDate: '2026-06-01', notes: 'Có kinh nghiệm tập gym 2 năm', createdAt: Date.now() - 86400000 * 60 },
         { id: 'client_2', name: 'Trần Thị Lan', age: 25, phone: '0987654321', email: 'lan.tran@gmail.com', height: 160, goals: 'Giảm cân', package: 'standard', sessionsRemaining: 18, sessionsCompleted: 6, startDate: '2026-07-01', notes: 'Người mới bắt đầu', createdAt: Date.now() - 86400000 * 30 },
         { id: 'client_3', name: 'Lê Hoàng Nam', age: 32, phone: '0934567890', email: 'nam.le@gmail.com', height: 180, goals: 'Tăng sức mạnh', package: 'vip', sessionsRemaining: 42, sessionsCompleted: 6, startDate: '2026-07-15', notes: 'Doanh nhân', createdAt: Date.now() - 86400000 * 15 },
-        { id: 'client_4', name: 'Phạm Hương Giang', age: 23, phone: '0901234567', email: 'giang.pham@gmail.com', height: 155, goals: 'Body toning', package: 'basic', sessionsRemaining: 8, sessionsCompleted: 4, startDate: '2026-07-20', notes: 'Sinh viên', createdAt: Date.now() - 86400000 * 10 }
+        { id: 'client_4', name: 'Phạm Hương Giang', age: 23, phone: '0901234567', email: 'giang.pham@gmail.com', height: 155, goals: 'Body toning', package: 'basic', sessionsRemaining: 8, sessionsCompleted: 4, startDate: '2026-07-20', notes: 'Sinh viên', createdAt: Date.now() - 86400000 * 10 },
+        { id: 'client_5', name: 'Võ Đức Anh', age: 30, phone: '0945678901', email: 'ducanh.vo@gmail.com', height: 172, goals: 'Tăng cơ', package: 'standard', sessionsRemaining: 20, sessionsCompleted: 4, startDate: '2026-08-01', notes: 'Tập đều 3 buổi mỗi tuần', createdAt: Date.now() - 86400000 * 7 },
+        { id: 'client_6', name: 'Nguyễn Thảo My', age: 27, phone: '0978901234', email: 'thaomy.nguyen@gmail.com', height: 163, goals: 'Giảm mỡ bụng', package: 'vip', sessionsRemaining: 30, sessionsCompleted: 10, startDate: '2026-07-10', notes: 'Ưu tiên bài tập thân dưới', createdAt: Date.now() - 86400000 * 25 },
+        { id: 'client_7', name: 'Đỗ Quang Huy', age: 35, phone: '0923456781', email: 'quanghuy.do@gmail.com', height: 178, goals: 'Cải thiện sức bền', package: 'basic', sessionsRemaining: 6, sessionsCompleted: 6, startDate: '2026-07-25', notes: 'Từng chạy marathon', createdAt: Date.now() - 86400000 * 12 },
+        { id: 'client_8', name: 'Bùi Ngọc Anh', age: 22, phone: '0967890123', email: 'ngocanh.bui@gmail.com', height: 158, goals: 'Tăng cân lành mạnh', package: 'standard', sessionsRemaining: 16, sessionsCompleted: 8, startDate: '2026-06-20', notes: 'Sinh viên năm cuối', createdAt: Date.now() - 86400000 * 45 },
+        { id: 'client_9', name: 'Hoàng Gia Bảo', age: 29, phone: '0916789012', email: 'giabao.hoang@gmail.com', height: 183, goals: 'Tăng cơ, tăng sức mạnh', package: 'vip', sessionsRemaining: 24, sessionsCompleted: 24, startDate: '2026-05-15', notes: 'Đã có nền tảng tập luyện', createdAt: Date.now() - 86400000 * 90 },
+        { id: 'client_10', name: 'Phan Khánh Linh', age: 26, phone: '0989012345', email: 'khanhlinh.phan@gmail.com', height: 167, goals: 'Giảm cân và săn chắc', package: 'basic', sessionsRemaining: 10, sessionsCompleted: 2, startDate: '2026-08-05', notes: 'Mới bắt đầu theo giáo án', createdAt: Date.now() - 86400000 * 3 }
     ];
 }
 
