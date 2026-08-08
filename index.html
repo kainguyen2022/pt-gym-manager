@@ -516,7 +516,12 @@ canvas{max-width:100%}
             <section class="section" id="nutritionSection">
                 <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Tính thực đơn</h2></div>
                 <div class="card">
-                    <div class="card-header"><h3>Thông tin</h3></div>
+                    <div class="card-header">
+                        <h3>Thông tin cá nhân</h3>
+                        <select id="nutritionClientSelect" class="form-control" onchange="loadClientNutrition()" style="width:auto;min-width:150px">
+                            <option value="">-- Chọn khách hàng --</option>
+                        </select>
+                    </div>
                     <div class="card-body">
                         <div class="form-row">
                             <div class="form-group"><label for="nutritionAge">Tuổi</label><input type="number" id="nutritionAge" value="25" min="15" max="80" class="form-control"></div>
@@ -524,23 +529,64 @@ canvas{max-width:100%}
                         </div>
                         <div class="form-row">
                             <div class="form-group"><label for="nutritionHeight">Chiều cao (cm)</label><input type="number" id="nutritionHeight" value="170" min="120" max="220" class="form-control"></div>
-                            <div class="form-group"><label for="nutritionWeight">Cân nặng (kg)</label><input type="number" id="nutritionWeight" value="70" min="30" max="200" class="form-control"></div>
+                            <div class="form-group"><label for="nutritionWeight">Cân nặng hiện tại (kg)</label><input type="number" id="nutritionWeight" value="70" min="30" max="200" class="form-control" step="0.1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Mục tiêu</h3></div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group"><label for="nutritionTargetWeight">Cân nặng mục tiêu (kg)</label><input type="number" id="nutritionTargetWeight" value="65" min="30" max="200" class="form-control" step="0.1"></div>
+                            <div class="form-group"><label for="nutritionWeeks">Thời gian (tuần)</label><input type="number" id="nutritionWeeks" value="12" min="4" max="52" class="form-control"></div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group"><label for="nutritionGoal">Mục tiêu</label><select id="nutritionGoal" class="form-control"><option value="maintain">Giữ cân</option><option value="cut">Giảm cân</option><option value="bulk">Tăng cơ</option></select></div>
-                            <div class="form-group"><label for="nutritionActivity">Vận động</label><select id="nutritionActivity" class="form-control"><option value="sedentary">Ít</option><option value="light">Nhẹ</option><option value="moderate" selected>Vừa</option><option value="active">Nhiều</option></select></div>
+                            <div class="form-group"><label for="nutritionGoal">Mục tiêu</label><select id="nutritionGoal" class="form-control" onchange="updateNutritionTarget()"><option value="cut">Giảm cân</option><option value="bulk">Tăng cơ</option><option value="maintain">Giữ cân</option></select></div>
+                            <div class="form-group"><label for="nutritionActivity">Mức vận động</label><select id="nutritionActivity" class="form-control"><option value="sedentary">Ít (Ngồi nhiều)</option><option value="light">Nhẹ (1-2 buổi/tuần)</option><option value="moderate" selected>Vừa (3-4 buổi/tuần)</option><option value="active">Nhiều (5-6 buổi/tuần)</option></select></div>
                         </div>
-                        <button class="btn btn-primary" onclick="calculateNutrition()" style="width:100%;margin-top:8px"><i data-lucide="calculator"></i>Tính toán</button>
+                        <div id="weightChangeInfo" style="background:var(--bg-secondary);padding:12px;border-radius:var(--radius-md);margin-bottom:12px;text-align:center">
+                            <span style="color:var(--text-muted);font-size:13px">Cần </span>
+                            <span id="weightChangeText" style="font-weight:600;font-size:16px">giảm 5kg</span>
+                            <span style="color:var(--text-muted);font-size:13px"> trong </span>
+                            <span id="weeklyChangeText" style="font-weight:600;font-size:16px">0.4kg/tuần</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="calculateNutrition()" style="width:100%"><i data-lucide="calculator"></i>Tính toán</button>
+                    </div>
+                </div>
+
+                <div class="card" style="background:var(--bg-secondary);border:1px dashed var(--accent-primary)">
+                    <div class="card-body" style="padding:12px;text-align:center">
+                        <span style="color:var(--accent-primary);font-size:12px">📊 Công thức: </span>
+                        <span style="color:var(--text-secondary);font-size:12px">Mifflin-St Jeor (BMR) × Mức vận động (TDEE) ± Calorie Adjustment</span>
                     </div>
                 </div>
                 <div class="nutrition-results" id="nutritionResults" style="display:none">
                     <div class="card">
-                        <div class="card-header"><h3>Kết quả</h3></div>
+                        <div class="card-header"><h3>Kết quả tính toán</h3></div>
                         <div class="card-body">
                             <div class="nutrition-stats">
                                 <div class="nutrition-stat"><span class="nutrition-stat-value" id="bmrResult">0</span><span class="nutrition-stat-label">BMR</span></div>
                                 <div class="nutrition-stat"><span class="nutrition-stat-value" id="tdeeResult">0</span><span class="nutrition-stat-label">TDEE</span></div>
                                 <div class="nutrition-stat highlight"><span class="nutrition-stat-value" id="targetCalResult">0</span><span class="nutrition-stat-label">Mục tiêu</span></div>
+                            </div>
+                            <div style="background:var(--bg-secondary);padding:16px;border-radius:var(--radius-md);margin-top:16px">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                                    <span style="color:var(--text-muted)">Cân nặng hiện tại</span>
+                                    <span id="currentWeightResult">- kg</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                                    <span style="color:var(--text-muted)">Cân nặng mục tiêu</span>
+                                    <span id="targetWeightResult">- kg</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                                    <span style="color:var(--text-muted)">Chênh lệch</span>
+                                    <span id="weightDiffResult" style="font-weight:600;color:var(--accent-primary)">- kg</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">
+                                    <span style="color:var(--text-muted)">Calorie Adjustment</span>
+                                    <span id="calorieAdjustResult" style="font-weight:600">- kcal/ngày</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1848,7 +1894,10 @@ function openNutritionFromClient() {
     if (age) document.getElementById('nutritionAge').value = age;
     closeModal('clientModal');
     navigateTo('nutrition');
-    setTimeout(() => calculateNutrition(), 300);
+    setTimeout(() => {
+        updateNutritionTarget();
+        calculateNutrition();
+    }, 300);
 }
 
 window.navigateTo = navigateTo;
