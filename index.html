@@ -46,7 +46,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .header-actions{display:flex;gap:8px}
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-secondary);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom, 0px)}
 .bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;height:100%;max-width:500px;margin:0 auto}
-.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;background:transparent;border:none;color:var(--text-muted);font-size:10px;font-weight:500;cursor:pointer;border-radius:var(--radius-md);min-width:56px}
+.bottom-nav-item{display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:transparent;border:none;color:var(--text-muted);font-size:10px;font-weight:500;cursor:pointer;border-radius:var(--radius-md);min-width:0}
 .bottom-nav-item i{width:22px;height:22px}
 .bottom-nav-item.active{color:var(--accent-primary)}
 .content{flex:1;padding:16px}
@@ -712,6 +712,7 @@ canvas{max-width:100%}
                 <button class="bottom-nav-item" data-section="nutrition"><i data-lucide="utensils"></i><span>Ăn uống</span></button>
                 <button class="bottom-nav-item" data-section="packages"><i data-lucide="package"></i><span>Gói</span></button>
                 <button class="bottom-nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Báo cáo</span></button>
+                <button class="bottom-nav-item" data-section="notifications"><i data-lucide="bell"></i><span>Nhắc nhở</span></button>
             </div>
         </nav>
     </main>
