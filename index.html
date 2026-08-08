@@ -1052,6 +1052,8 @@ function initFirebase() {
             localStorage.removeItem('ptGymManager');
             dataCache = null;
             loadFromFirestore();
+            // Load notification settings from Firestore after login
+            setTimeout(loadNotificationSettingsFromFirestore, 1000);
         } else {
             loadFromLocalStorage();
         }
