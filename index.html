@@ -1087,7 +1087,15 @@ function loadFromFirestore() {
     db.collection('users').doc(userId).collection('exercises').get().then((snapshot) => {
         const exercises = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         dataCache = dataCache || {};
-        dataCache.exercises = exercises;
+        // Use Firestore exercises, or fall back to sample exercises if empty
+        dataCache.exercises = exercises.length > 0 ? exercises : getSampleExercises();
+        // Sync sample exercises to Firestore on first load
+        if (exercises.length === 0) {
+            getSampleExercises().forEach(ex => {
+                const { id, ...exData } = ex;
+                db.collection('users').doc(userId).collection('exercises').add(exData);
+            });
+        }
         renderExercises();
     });
 }
@@ -1165,7 +1173,9 @@ function initDB() {
         if (!parsed.notifications) parsed.notifications = [];
         if (!parsed.clients) parsed.clients = [];
         if (!parsed.sessions) parsed.sessions = [];
-        if (!parsed.exercises) parsed.exercises = [];
+        if (!parsed.exercises || parsed.exercises.length === 0) {
+            parsed.exercises = getSampleExercises();
+        }
         saveData(parsed);
         dataCache = parsed;
         return parsed;
