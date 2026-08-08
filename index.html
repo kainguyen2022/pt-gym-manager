@@ -742,7 +742,8 @@ canvas{max-width:100%}
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const DB_NAME = 'ptGymManager';
+const DB_PREFIX = 'ptGymManager';
+function getDBName() { return DB_PREFIX + (currentUser ? '_' + currentUser.uid : ''); }
 let dataCache = null;
 let isFirebaseReady = false;
 let currentUser = null;
@@ -945,6 +946,9 @@ function initFirebase() {
         currentUser = user;
         updateAuthUI(user);
         if (user) {
+            // Clear old shared data when logging in
+            localStorage.removeItem('ptGymManager');
+            dataCache = null;
             loadFromFirestore();
         } else {
             loadFromLocalStorage();
@@ -1044,7 +1048,7 @@ function loadFromLocalStorage() {
 function saveToLocalStorage() {
     if (dataCache) {
         try {
-            localStorage.setItem(DB_NAME, JSON.stringify(dataCache));
+            localStorage.setItem(getDBName(), JSON.stringify(dataCache));
         } catch (e) {
             console.warn('Cannot save to localStorage:', e);
         }
@@ -1074,7 +1078,7 @@ function deleteFromFirestore(collectionName, docId) {
 function initDB() {
     if (dataCache) return dataCache;
     try {
-        const data = localStorage.getItem(DB_NAME);
+        const data = localStorage.getItem(getDBName());
         if (!data) {
             const initialData = {
                 clients: getSampleClients(),
@@ -1116,7 +1120,7 @@ function initDB() {
 function saveData(data) {
     dataCache = data;
     try {
-        localStorage.setItem(DB_NAME, JSON.stringify(data));
+        localStorage.setItem(getDBName(), JSON.stringify(data));
     } catch (e) {
         console.warn('Cannot save to localStorage:', e);
     }
