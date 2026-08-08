@@ -291,9 +291,37 @@ canvas{max-width:100%}
 .comparison-table td{color:var(--text-secondary)}
 .comparison-table .check{color:var(--success);width:20px;height:20px}
 .comparison-table .cross{color:var(--text-muted);width:20px;height:20px}
+
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+}
+.login-overlay.hidden { display: none; }
+.login-overlay h2 { font-size: 24px; margin-bottom: 8px; color: var(--text-primary); }
+.login-overlay p { color: var(--text-muted); margin-bottom: 24px; }
+
 </style>
 </head>
 <body>
+
+<div id="loginOverlay" class="login-overlay">
+    <i data-lucide="lock" style="width:64px;height:64px;color:var(--accent-primary);margin-bottom:24px"></i>
+    <h2>Vui lòng đăng nhập</h2>
+    <p>Đăng nhập để xem và quản lý dữ liệu của bạn</p>
+    <button class="btn btn-primary" onclick="signInWithGoogle()"><i data-lucide="log-in"></i> Đăng nhập với Google</button>
+</div>
+
 <div class="app">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -321,8 +349,8 @@ canvas{max-width:100%}
             <div class="user-info">
                 <div class="user-avatar">PT</div>
                 <div>
-                    <div class="user-name">Personal Trainer</div>
-                    <div class="user-role">Quản lý</div>
+                    <div class="user-name">Vui lòng đăng nhập</div>
+                    <div class="user-role">Để xem dữ liệu của bạn</div>
                 </div>
             </div>
         </div>
@@ -987,13 +1015,21 @@ function updateAuthUI(user) {
         authBtn.onclick = signOut;
         isFirebaseReady = true;
     } else {
-        userNameEl.textContent = 'Personal Trainer';
-        userRoleEl.textContent = 'Quản lý';
+        userNameEl.textContent = 'Vui lòng đăng nhập';
+        userRoleEl.textContent = 'Để xem dữ liệu của bạn';
         authBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
         authBtn.onclick = signInWithGoogle;
         isFirebaseReady = false;
     }
-    lucide.createIcons();
+        lucide.createIcons();
+        
+        // Show/hide login overlay
+        const overlay = document.getElementById('loginOverlay');
+        if (user) {
+            overlay.classList.add('hidden');
+        } else {
+            overlay.classList.remove('hidden');
+        }
 }
 
 function loadFromFirestore() {
