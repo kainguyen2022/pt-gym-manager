@@ -1844,6 +1844,7 @@ function renderLibraryExercises(filter) {
     filter = filter || '';
     const grid = document.getElementById('libraryGrid');
     if (!grid) return;
+    const catNames = { chest: 'Ngực', back: 'Lưng', shoulders: 'Vai', arms: 'Tay', legs: 'Chân', core: 'Bụng', cardio: 'Cardio' };
     const filtered = exerciseLibrary.filter(ex => 
         ex.name.toLowerCase().includes(filter.toLowerCase()) || 
         (ex.description && ex.description.toLowerCase().includes(filter.toLowerCase()))
