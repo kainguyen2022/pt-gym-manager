@@ -1536,6 +1536,7 @@ function addSession(sessionData) {
     };
     data.sessions.push(session);
     saveData(data);
+    syncToFirestore('sessions', session, session.id);
     return session;
 }
 
@@ -1545,6 +1546,7 @@ function updateSession(id, sessionData) {
     if (index !== -1) {
         data.sessions[index] = { ...data.sessions[index], ...sessionData };
         saveData(data);
+        syncToFirestore('sessions', data.sessions[index], id);
         return data.sessions[index];
     }
     return null;
@@ -1554,6 +1556,7 @@ function deleteSession(id) {
     const data = getAllData();
     data.sessions = data.sessions.filter(s => s.id !== id);
     saveData(data);
+    deleteFromFirestore('sessions', id);
 }
 
 function getMeasurements() { return getAllData().measurements || []; }
