@@ -685,8 +685,8 @@ canvas{max-width:100%}
                         <div id="pushSettings" style="display:none">
                             <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Nhắc trước:</div>
                             <div style="display:flex;gap:12px">
-                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="notif15min" value="15" checked> 15 phút</label>
-                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="notif1hour" value="60" checked> 1 tiếng</label>
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="notif15min" value="15" onchange="saveNotificationSettings()"> 15 phút</label>
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="notif1hour" value="60" onchange="saveNotificationSettings()"> 1 tiếng</label>
                             </div>
                         </div>
                     </div>
@@ -1142,6 +1142,48 @@ function loadNotificationSettings() {
         document.getElementById('notif15min').checked = notif15;
         document.getElementById('notif1hour').checked = notif1h;
     }
+
+    // Load from Firestore if logged in
+    if (currentUser) {
+        loadNotificationSettingsFromFirestore();
+    }
+}
+
+async function loadNotificationSettingsFromFirestore() {
+    if (!currentUser) return;
+    try {
+        const doc = await firebase.firestore().collection('users').doc(currentUser.uid)
+            .collection('settings').doc('notifications').get();
+        if (doc.exists && doc.data()) {
+            const data = doc.data();
+            localStorage.setItem('pushEnabled', data.enabled ? 'true' : 'false');
+            localStorage.setItem('notif15min', data.notif15min ? 'true' : 'false');
+            localStorage.setItem('notif1hour', data.notif1hour ? 'true' : 'false');
+            document.getElementById('pushEnabled').checked = data.enabled;
+            document.getElementById('pushSettings').style.display = data.enabled ? 'block' : 'none';
+            if (data.enabled) {
+                document.getElementById('notif15min').checked = data.notif15min;
+                document.getElementById('notif1hour').checked = data.notif1hour;
+            }
+        }
+    } catch (err) {
+        console.error('Load notification settings error:', err);
+    }
+}
+
+async function saveNotificationSettings() {
+    if (!currentUser) return;
+    try {
+        const settings = {
+            enabled: document.getElementById('pushEnabled').checked,
+            notif15min: document.getElementById('notif15min')?.checked,
+            notif1hour: document.getElementById('notif1hour')?.checked
+        };
+        await firebase.firestore().collection('users').doc(currentUser.uid)
+            .collection('settings').doc('notifications').set(settings, { merge: true });
+    } catch (err) {
+        console.error('Save notification settings error:', err);
+    }
 }
 
 async function togglePushNotification() {
@@ -1168,11 +1210,13 @@ async function togglePushNotification() {
 
         document.getElementById('pushSettings').style.display = 'block';
         localStorage.setItem('pushEnabled', 'true');
+        saveNotificationSettings();
         showToast('Đã bật thông báo', 'success');
     } else {
         document.getElementById('pushSettings').style.display = 'none';
         localStorage.setItem('pushEnabled', 'false');
         clearScheduledNotifications();
+        saveNotificationSettings();
         showToast('Đã tắt thông báo', 'success');
     }
 }
