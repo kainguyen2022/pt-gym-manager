@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f0f14">
+    <title>PT Gym Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+:root{--bg-primary:#0f0f14;--bg-secondary:#1a1a24;--bg-card:#22222e;--bg-hover:#2a2a38;--accent-primary:#f59e0b;--accent-secondary:#fb923c;--accent-glow:rgba(245,158,11,0.2);--text-primary:#f4f4f5;--text-secondary:#a1a1aa;--text-muted:#71717a;--success:#22c55e;--warning:#eab308;--danger:#ef4444;--border:#27272a;--sidebar-width:260px;--header-height:60px;--bottom-nav-height:64px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:12px;--shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 6px rgba(0,0,0,0.4);--shadow-lg:0 10px 25px rgba(0,0,0,0.5);--shadow-glow:0 0 20px var(--accent-glow)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.5;font-size:15px;min-height:100vh;min-height:100dvh;overflow-x:hidden}
+::selection{background:var(--accent-primary);color:var(--bg-primary)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:3px}
+.app{display:flex;min-height:100vh;min-height:100dvh}
+.sidebar{width:var(--sidebar-width);background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1)}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;color:var(--text-primary)}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-nav{flex:1;padding:12px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;background:transparent;color:var(--text-secondary);font-size:14px;font-weight:500;border-radius:var(--radius-md);cursor:pointer;transition:all 0.2s ease;width:100%;border-left:3px solid transparent}
+.nav-item:hover{background:var(--bg-hover);color:var(--text-primary)}
+.nav-item.active{background:var(--bg-card);color:var(--accent-primary);border-left-color:var(--accent-primary)}
+.nav-item i{width:20px;height:20px}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--bg-primary)}
+.user-name{font-weight:600;font-size:13px}
+.user-role{font-size:11px;color:var(--text-muted)}
+.main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))}
+.header{height:var(--header-height);background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.menu-toggle{display:none;background:transparent;border:none;color:var(--text-primary);cursor:pointer;padding:8px}
+.header-title{flex:1}
+.header-title h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.header-actions{display:flex;gap:8px}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-secondary);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom, 0px)}
+.bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;height:100%;max-width:500px;margin:0 auto}
+.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;background:transparent;border:none;color:var(--text-muted);font-size:10px;font-weight:500;cursor:pointer;border-radius:var(--radius-md);min-width:56px}
+.bottom-nav-item i{width:22px;height:22px}
+.bottom-nav-item.active{color:var(--accent-primary)}
+.content{flex:1;padding:16px}
+.section{display:none;animation:fadeSlide 0.3s ease}
+.section.active{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;gap:12px}
+.stat-icon{width:48px;height:48px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon i{width:24px;height:24px;color:white}
+.stat-content{min-width:0}
+.stat-number{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:2px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-header h3{font-size:15px;font-weight:600}
+.card-body{padding:16px}
+.badge{background:var(--accent-primary);color:var(--bg-primary);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.empty-state{text-align:center;padding:32px 16px;color:var(--text-muted)}
+.empty-state i{width:40px;height:40px;margin-bottom:12px;opacity:0.5}
+.empty-state p{margin-bottom:12px;font-size:14px}
+.session-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:10px}
+.session-time{font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;color:var(--accent-primary);min-width:50px}
+.session-info{flex:1;min-width:0}
+.session-client{font-weight:600;font-size:14px;margin-bottom:2px}
+.session-meta{font-size:12px;color:var(--text-muted)}
+.session-type{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.clients-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.client-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer}
+.client-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--bg-primary);margin-bottom:12px}
+.client-name{font-size:16px;font-weight:600;margin-bottom:6px}
+.client-package{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:10px}
+.client-package.basic{background:rgba(113,113,122,0.2);color:var(--text-secondary)}
+.client-package.standard{background:rgba(59,130,246,0.2);color:#60a5fa}
+.client-package.vip{background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(251,146,60,0.2));color:var(--accent-primary)}
+.client-progress{margin-top:8px}
+.progress-bar{height:5px;background:var(--bg-secondary);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));border-radius:3px}
+.progress-text{font-size:11px;color:var(--text-muted);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s ease;touch-action:manipulation}
+.btn i{width:18px;height:18px}
+.btn-primary{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:var(--bg-primary)}
+.btn-primary:hover{box-shadow:var(--shadow-glow)}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text-primary)}
+.btn-text{background:transparent;color:var(--accent-primary);padding:8px 12px;font-size:13px}
+.btn-icon{background:transparent;border:none;color:var(--text-secondary);padding:8px;border-radius:var(--radius-md)}
+.btn-icon:hover{background:var(--bg-hover)}
+.btn-fab{position:fixed;bottom:calc(var(--bottom-nav-height) + 16px);right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:var(--bg-primary);box-shadow:var(--shadow-lg);z-index:40;display:flex}
+.btn-fab i{width:24px;height:24px}
+.section-toolbar{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.search-box{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;flex:1}
+.search-box i{color:var(--text-muted);width:18px;height:18px}
+.search-box input{flex:1;background:transparent;border:none;color:var(--text-primary);font-size:14px;outline:none}
+.calendar-nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.calendar-nav h3{font-family:'Bebas Neue',sans-serif;font-size:20px;text-align:center;flex:1}
+.calendar-container{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.calendar-header{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg-secondary)}
+.calendar-header span{padding:8px 4px;text-align:center;font-weight:600;font-size:11px;color:var(--text-muted)}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.calendar-day{min-height:60px;padding:4px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer}
+.calendar-day:nth-child(7n){border-right:none}
+.calendar-day.other-month{opacity:0.3}
+.calendar-day.today{background:rgba(245,158,11,0.1)}
+.day-number{font-weight:600;font-size:13px;margin-bottom:2px}
+.day-sessions{display:flex;flex-direction:column;gap:1px}
+.day-session{background:var(--accent-primary);color:var(--bg-primary);font-size:9px;padding:1px 3px;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-type.personal{background:rgba(59,130,246,0.2);color:#60a5fa}
+.session-type.assessment{background:rgba(168,85,247,0.2);color:#c084fc}
+.session-type.followup{background:rgba(34,197,94,0.2);color:#4ade80}
+.tabs{display:flex;gap:4px;background:var(--bg-card);padding:4px;border-radius:var(--radius-md);overflow-x:auto}
+.tab{padding:8px 16px;background:transparent;border:none;border-radius:var(--radius-sm);color:var(--text-secondary);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.tab.active{background:var(--accent-primary);color:var(--bg-primary)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.exercises-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.exercise-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.exercise-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.exercise-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center}
+.exercise-icon i{width:20px;height:20px;color:var(--bg-primary)}
+.exercise-category{padding:4px 8px;background:var(--bg-secondary);border-radius:20px;font-size:10px;color:var(--text-muted)}
+.exercise-name{font-size:15px;font-weight:600;margin-bottom:6px}
+.exercise-meta{display:flex;gap:12px;font-size:12px;color:var(--text-muted)}
+.exercise-meta span{display:flex;align-items:center;gap:4px}
+.form-control{width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-size:15px}
+.form-control:focus{outline:none;border-color:var(--accent-primary)}
+.form-row{display:grid;grid-template-columns:1fr;gap:12px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-size:15px}
+.form-group select{-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.nutrition-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.nutrition-stat{background:var(--bg-secondary);padding:14px 10px;border-radius:var(--radius-md);text-align:center}
+.nutrition-stat.highlight{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))}
+.nutrition-stat.highlight .nutrition-stat-value,.nutrition-stat.highlight .nutrition-stat-label{color:var(--bg-primary)}
+.nutrition-stat-value{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;display:block}
+.nutrition-stat-label{font-size:11px;color:var(--text-muted)}
+.macro-chart-container{height:160px;margin-bottom:16px}
+.macro-details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.macro-item{background:var(--bg-secondary);padding:12px;border-radius:var(--radius-md);text-align:center}
+.macro-label{display:block;font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase}
+.macro-value{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;display:block;margin-bottom:2px}
+.macro-cal{font-size:10px;color:var(--text-secondary)}
+.meal-plan{display:flex;flex-direction:column;gap:12px}
+.meal-item{background:var(--bg-secondary);padding:14px;border-radius:var(--radius-md)}
+.meal-item h4{font-size:13px;color:var(--accent-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.meal-item h4 i{width:16px;height:16px}
+.meal-item ul{list-style:none;padding:0;margin:0}
+.meal-item li{padding:4px 0;color:var(--text-secondary);font-size:13px;border-bottom:1px solid var(--border)}
+.meal-item li:last-child{border-bottom:none}
+.report-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.report-stat{background:var(--bg-secondary);padding:14px;border-radius:var(--radius-md);display:flex;align-items:center;gap:10px}
+.report-stat i{width:32px;height:32px;color:var(--accent-primary);flex-shrink:0}
+.report-stat-value{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700}
+.report-stat-label{font-size:11px;color:var(--text-muted)}
+.report-client-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:10px}
+.report-client-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--bg-primary);flex-shrink:0}
+.report-client-info{flex:1;min-width:0}
+.report-client-name{font-weight:600;font-size:14px;margin-bottom:4px}
+.report-client-progress{display:flex;align-items:center;gap:10px}
+.report-client-progress .progress-bar{width:80px;flex-shrink:0}
+.report-progress-text{font-size:12px;color:var(--text-muted)}
+.report-actions{display:flex;flex-direction:column;gap:8px}
+.reminder-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:10px}
+.reminder-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reminder-icon i{width:20px;height:20px;color:var(--bg-primary)}
+.reminder-info{flex:1;min-width:0}
+.reminder-client{font-weight:600;font-size:14px;margin-bottom:2px}
+.reminder-details{font-size:12px;color:var(--text-muted)}
+.sent-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:8px}
+.sent-item i{color:var(--success);width:18px;height:18px;flex-shrink:0}
+.sent-item-info{flex:1;font-size:13px;color:var(--text-secondary)}
+.sent-time{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;height:100dvh;z-index:1000;overflow-y:auto}
+.modal.active{display:flex;align-items:flex-end;justify-content:center}
+.modal-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;height:100dvh;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)}
+.modal-content{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:100%;max-height:90vh;max-height:90dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1)}
+.modal-content.modal-lg{max-width:100%}
+@keyframes modalSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-header h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.modal-body{padding:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--border);background:var(--bg-card)}
+.modal-footer .btn{flex:1}
+.client-detail-header{display:flex;gap:16px;margin-bottom:20px}
+.client-detail-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;color:var(--bg-primary);flex-shrink:0}
+.client-detail-info h3{font-size:20px;margin-bottom:4px}
+.client-detail-info p{color:var(--text-muted);font-size:13px}
+.client-detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.client-stat{background:var(--bg-secondary);padding:12px;border-radius:var(--radius-md);text-align:center}
+.client-stat-value{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;color:var(--accent-primary)}
+.client-stat-label{font-size:11px;color:var(--text-muted)}
+.client-detail-section{margin-bottom:16px}
+.client-detail-section h4{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase}
+.client-detail-section p{color:var(--text-secondary);font-size:14px;line-height:1.6}
+.measurement-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.measurement-content{margin-top:16px}
+canvas{max-width:100%}
+.toast-container{position:fixed;bottom:calc(var(--bottom-nav-height) + 16px);right:16px;left:16px;display:flex;flex-direction:column;gap:8px;z-index:2000;pointer-events:none}
+.toast{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;display:flex;align-items:center;gap:10px;animation:toastSlide 0.3s ease;box-shadow:var(--shadow-lg);pointer-events:auto}
+.toast.success{border-color:var(--success)}
+.toast.error{border-color:var(--danger)}
+.toast-icon{width:20px;height:20px;flex-shrink:0}
+.toast.success .toast-icon{color:var(--success)}
+.toast.error .toast-icon{color:var(--danger)}
+.toast-message{font-size:13px}
+@keyframes toastSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:769px){
+    .stats-grid{grid-template-columns:repeat(4,1fr);gap:16px}
+    .stat-card{flex-direction:column;text-align:center;padding:20px}
+    .clients-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .measurement-grid{grid-template-columns:1fr 1fr}
+    .form-row{grid-template-columns:1fr 1fr}
+    .report-stats{grid-template-columns:repeat(4,1fr)}
+    .nutrition-stats{grid-template-columns:repeat(3,1fr);gap:16px}
+    .macro-details{grid-template-columns:repeat(3,1fr)}
+    .exercises-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+    .calendar-day{min-height:90px}
+    .section-toolbar{flex-direction:row;justify-content:space-between;align-items:center}
+    .search-box{max-width:320px}
+    .report-actions{flex-direction:row}
+    .btn-fab{display:none}
+    .header-actions .btn span{display:inline}
+    .modal.active{align-items:center}
+    .modal-content{border-radius:var(--radius-xl);max-width:500px}
+    .modal-content.modal-lg{max-width:700px}
+    .toast-container{left:auto;max-width:320px}
+}
+@media(min-width:1024px){
+    .bottom-nav{display:none!important}
+    .sidebar{transform:translateX(0)!important}
+    .main-content{margin-left:var(--sidebar-width);padding-bottom:0}
+    .menu-toggle{display:none!important}
+}
+@media(max-width:1023px){
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0)}
+    .main-content{margin-left:0}
+    .menu-toggle{display:flex}
+    .bottom-nav{display:flex}
+    .content{padding-bottom:calc(var(--bottom-nav-height) + 20px)}
+    #addClientBtn{display:none}
+    .header{padding:0 12px}
+    .modal-content::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(--text-muted);border-radius:2px;opacity:0.5}
+    .btn{min-height:44px}
+    .nav-item{min-height:48px}
+}
+@media print{
+    .sidebar,.bottom-nav,.header,.btn-fab{display:none!important}
+    .main-content{margin-left:0}
+}
+    
+.packages-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.package-card{background:var(--bg-card);border:2px solid var(--border);border-radius:var(--radius-xl);padding:20px;position:relative;overflow:hidden;transition:all 0.3s ease}
+.package-card:hover{transform:translateY(-4px);border-color:var(--accent-primary);box-shadow:var(--shadow-glow)}
+.package-card.featured{border-color:var(--accent-primary);background:linear-gradient(135deg,rgba(245,158,11,0.05),transparent)}
+.package-card.featured::before{content:'Phổ biến nhất';position:absolute;top:12px;right:-30px;background:var(--accent-primary);color:var(--bg-primary);font-size:10px;font-weight:700;padding:4px 40px;transform:rotate(45deg)}
+.package-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.package-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text-primary)}
+.package-price{text-align:right}
+.package-price .amount{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:var(--accent-primary)}
+.package-price .period{font-size:12px;color:var(--text-muted)}
+.package-description{color:var(--text-secondary);font-size:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.package-features{list-style:none;padding:0;margin:0}
+.package-features li{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:var(--text-secondary)}
+.package-features li i{width:18px;height:18px;color:var(--success);flex-shrink:0}
+.package-features li.disabled{opacity:0.4}
+.package-features li.disabled i{color:var(--text-muted)}
+.package-cta{width:100%;margin-top:16px;padding:12px;background:transparent;border:2px solid var(--accent-primary);color:var(--accent-primary);border-radius:var(--radius-md);font-weight:600;cursor:pointer;transition:all 0.2s ease}
+.package-cta:hover{background:var(--accent-primary);color:var(--bg-primary)}
+.package-card.featured .package-cta{background:var(--accent-primary);color:var(--bg-primary)}
+.package-card.featured .package-cta:hover{background:var(--accent-secondary)}
+.comparison-table{width:100%;border-collapse:collapse;font-size:13px;overflow-x:auto;display:block}
+.comparison-table th,.comparison-table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.comparison-table th{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;background:var(--bg-secondary)}
+.comparison-table td{color:var(--text-secondary)}
+.comparison-table .check{color:var(--success);width:20px;height:20px}
+.comparison-table .cross{color:var(--text-muted);width:20px;height:20px}
+</style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+                    <rect x="5" y="16" width="30" height="8" rx="2" fill="currentColor"/>
+                    <circle cx="8" cy="20" r="6" fill="var(--accent-primary)"/>
+                    <circle cx="32" cy="20" r="6" fill="var(--accent-primary)"/>
+                </svg>
+                <span class="logo-text">PT GYM</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-section="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+            <button class="nav-item" data-section="clients"><i data-lucide="users"></i><span>Khách hàng</span></button>
+            <button class="nav-item" data-section="schedule"><i data-lucide="calendar"></i><span>Lịch tập</span></button>
+            <button class="nav-item" data-section="packages"><i data-lucide="package"></i><span>Gói tập</span></button>
+            <button class="nav-item" data-section="programs"><i data-lucide="dumbbell"></i><span>Bài tập</span></button>
+            <button class="nav-item" data-section="measurements"><i data-lucide="ruler"></i><span>Đo chỉ số</span></button>
+            <button class="nav-item" data-section="nutrition"><i data-lucide="utensils"></i><span>Thực đơn</span></button>
+            <button class="nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Báo cáo</span></button>
+            <button class="nav-item" data-section="notifications"><i data-lucide="bell"></i><span>Nhắc nhở</span></button>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">PT</div>
+                <div>
+                    <div class="user-name">Personal Trainer</div>
+                    <div class="user-role">Quản lý</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle"><i data-lucide="menu"></i></button>
+            <div class="header-title"><h1 id="pageTitle">Dashboard</h1></div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="authBtn"><i data-lucide="log-in"></i><span>Đăng nhập</span></button>
+                <button class="btn btn-primary" id="addClientBtn"><i data-lucide="user-plus"></i><span>Thêm khách</span></button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Dashboard Section -->
+            <section class="section active" id="dashboardSection">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary))"><i data-lucide="users"></i></div>
+                        <div class="stat-content"><span class="stat-number" id="totalClients">0</span><span class="stat-label">Tổng KH</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a)"><i data-lucide="calendar-check"></i></div>
+                        <div class="stat-content"><span class="stat-number" id="weeklySessions">0</span><span class="stat-label">Buổi tuần</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><i data-lucide="trending-up"></i></div>
+                        <div class="stat-content"><span class="stat-number" id="totalSessions">0</span><span class="stat-label">Tổng buổi</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#ec4899,#db2777)"><i data-lucide="target"></i></div>
+                        <div class="stat-content"><span class="stat-number" id="activeGoals">0</span><span class="stat-label">Mục tiêu</span></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid" style="display:none"></div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Buổi tập hôm nay</h3><span class="badge" id="todayCount">0</span></div>
+                    <div class="card-body" id="todaySessions"><div class="empty-state"><i data-lucide="calendar-x"></i><p>Không có buổi tập nào hôm nay</p></div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Thống kê tháng</h3></div>
+                    <div class="card-body"><canvas id="monthlyChart"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Khách hàng gần đây</h3><button class="btn btn-text" onclick="navigateTo('clients')">Xem tất cả</button></div>
+                    <div class="card-body" id="recentClients"><div class="empty-state"><i data-lucide="users-round"></i><p>Chưa có khách hàng nào</p><button class="btn btn-primary" onclick="openClientModal()">Thêm khách hàng đầu tiên</button></div></div>
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section class="section" id="clientsSection">
+                <div class="section-toolbar">
+                    <div class="search-box"><i data-lucide="search"></i><input type="text" id="clientSearch" placeholder="Tìm kiếm..."></div>
+                </div>
+                <div class="clients-grid" id="clientsGrid"><div class="empty-state"><i data-lucide="users-round"></i><p>Chưa có khách hàng nào</p></div></div>
+            </section>
+
+            <!-- Schedule Section -->
+            <section class="section" id="scheduleSection">
+                <div class="section-toolbar">
+                    <div class="calendar-nav">
+                        <button class="btn btn-icon" id="prevMonth"><i data-lucide="chevron-left"></i></button>
+                        <h3 id="currentMonth">Tháng 8, 2026</h3>
+                        <button class="btn btn-icon" id="nextMonth"><i data-lucide="chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-header"><span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span></div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Lịch tập tháng</h3></div>
+                    <div class="card-body" id="sessionsList"><div class="empty-state"><i data-lucide="calendar-x"></i><p>Chưa có lịch tập nào</p></div></div>
+                </div>
+            </section>
+
+            
+            <!-- Packages Section -->
+            <section class="section" id="packagesSection">
+                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Gói tập</h2></div>
+                
+                <div class="packages-grid" id="packagesGrid">
+                    <div class="package-card">
+                        <div class="package-header">
+                            <div class="package-name">BASIC</div>
+                            <div class="package-price"><span class="amount">1.500K</span><span class="period">/tháng</span></div>
+                        </div>
+                        <div class="package-description">Phù hợp cho người mới bắt đầu tập gym, muốn trải nghiệm dịch vụ PT.</div>
+                        <ul class="package-features">
+                            <li><i data-lucide="check"></i> 12 buổi tập mỗi tháng</li>
+                            <li><i data-lucide="check"></i> Lịch tập cơ bản</li>
+                            <li><i data-lucide="check"></i> Hướng dẫn tư thế tập</li>
+                            <li><i data-lucide="check"></i> Theo dõi tiến độ đơn giản</li>
+                            <li><i data-lucide="check"></i> Tư vấn dinh dưỡng cơ bản</li>
+                            <li class="disabled"><i data-lucide="x"></i> Kế hoạch tập cá nhân hóa</li>
+                            <li class="disabled"><i data-lucide="x"></i> Đo chỉ số chi tiết</li>
+                            <li class="disabled"><i data-lucide="x"></i> Hỗ trợ 24/7</li>
+                        </ul>
+                        <button class="package-cta" onclick="selectPackage('basic')">Chọn Basic</button>
+                    </div>
+
+                    <div class="package-card featured">
+                        <div class="package-header">
+                            <div class="package-name">STANDARD</div>
+                            <div class="package-price"><span class="amount">2.800K</span><span class="period">/tháng</span></div>
+                        </div>
+                        <div class="package-description">Gói phổ biến nhất, phù hợp với người có mục tiêu rõ ràng và cam kết tập luyện.</div>
+                        <ul class="package-features">
+                            <li><i data-lucide="check"></i> 24 buổi tập mỗi tháng</li>
+                            <li><i data-lucide="check"></i> Lịch tập cá nhân hóa</li>
+                            <li><i data-lucide="check"></i> Điều chỉnh bài tập theo tiến độ</li>
+                            <li><i data-lucide="check"></i> Đo chỉ số cơ thể hàng tháng</li>
+                            <li><i data-lucide="check"></i> Tư vấn dinh dưỡng chi tiết</li>
+                            <li><i data-lucide="check"></i> Đánh giá định kỳ hàng tháng</li>
+                            <li><i data-lucide="check"></i> Hỗ trợ qua tin nhắn</li>
+                            <li class="disabled"><i data-lucide="x"></i> Kế hoạch 1-1 hoàn toàn</li>
+                        </ul>
+                        <button class="package-cta" onclick="selectPackage('standard')">Chọn Standard</button>
+                    </div>
+
+                    <div class="package-card">
+                        <div class="package-header">
+                            <div class="package-name">VIP</div>
+                            <div class="package-price"><span class="amount">5.000K</span><span class="period">/tháng</span></div>
+                        </div>
+                        <div class="package-description">Dành cho khách hàng cam kết dài hạn, muốn kết quả tối ưu nhất.</div>
+                        <ul class="package-features">
+                            <li><i data-lucide="check"></i> 48 buổi tập mỗi tháng</li>
+                            <li><i data-lucide="check"></i> Kế hoạch tập 1-1 hoàn toàn</li>
+                            <li><i data-lucide="check"></i> Đo chỉ số + đánh giá 2 lần/tuần</li>
+                            <li><i data-lucide="check"></i> Thực đơn dinh dưỡng cá nhân</li>
+                            <li><i data-lucide="check"></i> Video hướng dẫn từng bài tập</li>
+                            <li><i data-lucide="check"></i> Hỗ trợ 24/7 qua điện thoại</li>
+                            <li><i data-lucide="check"></i> Ưu tiên đặt lịch</li>
+                            <li><i data-lucide="check"></i> Tham gia cộng đồng VIP</li>
+                        </ul>
+                        <button class="package-cta" onclick="selectPackage('vip')">Chọn VIP</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:24px">
+                    <div class="card-header"><h3>So sánh chi tiết các gói</h3></div>
+                    <div class="card-body" style="overflow-x:auto">
+                        <table class="comparison-table">
+                            <thead><tr><th>Tính năng</th><th>Basic</th><th>Standard</th><th>VIP</th></tr></thead>
+                            <tbody>
+                                <tr><td>Số buổi tập/tháng</td><td>12 buổi</td><td>24 buổi</td><td>48 buổi</td></tr>
+                                <tr><td>Lịch tập cá nhân hóa</td><td><i data-lucide="x" class="cross"></i></td><td><i data-lucide="check" class="check"></i></td><td><i data-lucide="check" class="check"></i></td></tr>
+                                <tr><td>Theo dõi tiến độ</td><td>Cơ bản</td><td>Chi tiết</td><td>Toàn diện</td></tr>
+                                <tr><td>Đo chỉ số cơ thể</td><td><i data-lucide="x" class="cross"></i></td><td>Hàng tháng</td><td>2 lần/tuần</td></tr>
+                                <tr><td>Tư vấn dinh dưỡng</td><td>Cơ bản</td><td>Chi tiết</td><td>Thực đơn cá nhân</td></tr>
+                                <tr><td>Đánh giá định kỳ</td><td><i data-lucide="x" class="cross"></i></td><td>Hàng tháng</td><td>Hàng tuần</td></tr>
+                                <tr><td>Hỗ trợ</td><td>Tại phòng tập</td><td>Qua tin nhắn</td><td>24/7</td></tr>
+                                <tr><td>Video hướng dẫn</td><td><i data-lucide="x" class="cross"></i></td><td><i data-lucide="x" class="cross"></i></td><td><i data-lucide="check" class="check"></i></td></tr>
+                                <tr><td>Ưu tiên đặt lịch</td><td><i data-lucide="x" class="cross"></i></td><td><i data-lucide="x" class="cross"></i></td><td><i data-lucide="check" class="check"></i></td></tr>
+                                <tr><td><strong>Giá tháng</strong></td><td><strong>1.500.000đ</strong></td><td><strong>2.800.000đ</strong></td><td><strong>5.000.000đ</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <!-- Programs Section -->
+            <section class="section" id="programsSection">
+                <div class="section-toolbar">
+                    <div class="tabs">
+                        <button class="tab active" data-tab="exercises">Bài tập</button>
+                        <button class="tab" data-tab="programs">Kế hoạch</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="openExerciseModal()"><i data-lucide="plus"></i><span>Thêm</span></button>
+                </div>
+                <div class="tab-content active" id="exercisesTab">
+                    <div class="exercises-grid" id="exercisesGrid"><div class="empty-state"><i data-lucide="dumbbell"></i><p>Chưa có bài tập nào</p></div></div>
+                </div>
+                <div class="tab-content" id="programsTab">
+                    <div class="programs-list" id="programsList"><div class="empty-state"><i data-lucide="clipboard-list"></i><p>Chưa có kế hoạch tập nào</p></div></div>
+                </div>
+            </section>
+
+            <!-- Measurements Section -->
+            <section class="section" id="measurementsSection">
+                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Theo dõi chỉ số</h2></div>
+                <div class="card">
+                    <div class="card-body"><select id="measurementClient" class="form-control" onchange="renderMeasurementHistory()"><option value="">-- Chọn khách hàng --</option></select></div>
+                </div>
+                <div class="measurement-content" id="measurementContent" style="display:none">
+                    <div class="measurement-grid">
+                        <div class="card"><div class="card-header"><h3>Cân nặng</h3></div><div class="card-body"><canvas id="weightChart"></canvas></div></div>
+                        <div class="card"><div class="card-header"><h3>Các chỉ số</h3></div><div class="card-body"><canvas id="measurementsChart"></canvas></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nutrition Section -->
+            <section class="section" id="nutritionSection">
+                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Tính thực đơn</h2></div>
+                <div class="card">
+                    <div class="card-header"><h3>Thông tin</h3></div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group"><label for="nutritionAge">Tuổi</label><input type="number" id="nutritionAge" value="25" min="15" max="80" class="form-control"></div>
+                            <div class="form-group"><label for="nutritionGender">Giới tính</label><select id="nutritionGender" class="form-control"><option value="male">Nam</option><option value="female">Nữ</option></select></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="nutritionHeight">Chiều cao (cm)</label><input type="number" id="nutritionHeight" value="170" min="120" max="220" class="form-control"></div>
+                            <div class="form-group"><label for="nutritionWeight">Cân nặng (kg)</label><input type="number" id="nutritionWeight" value="70" min="30" max="200" class="form-control"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="nutritionGoal">Mục tiêu</label><select id="nutritionGoal" class="form-control"><option value="maintain">Giữ cân</option><option value="cut">Giảm cân</option><option value="bulk">Tăng cơ</option></select></div>
+                            <div class="form-group"><label for="nutritionActivity">Vận động</label><select id="nutritionActivity" class="form-control"><option value="sedentary">Ít</option><option value="light">Nhẹ</option><option value="moderate" selected>Vừa</option><option value="active">Nhiều</option></select></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="calculateNutrition()" style="width:100%;margin-top:8px"><i data-lucide="calculator"></i>Tính toán</button>
+                    </div>
+                </div>
+                <div class="nutrition-results" id="nutritionResults" style="display:none">
+                    <div class="card">
+                        <div class="card-header"><h3>Kết quả</h3></div>
+                        <div class="card-body">
+                            <div class="nutrition-stats">
+                                <div class="nutrition-stat"><span class="nutrition-stat-value" id="bmrResult">0</span><span class="nutrition-stat-label">BMR</span></div>
+                                <div class="nutrition-stat"><span class="nutrition-stat-value" id="tdeeResult">0</span><span class="nutrition-stat-label">TDEE</span></div>
+                                <div class="nutrition-stat highlight"><span class="nutrition-stat-value" id="targetCalResult">0</span><span class="nutrition-stat-label">Mục tiêu</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>Macros</h3></div>
+                        <div class="card-body">
+                            <div class="macro-chart-container"><canvas id="macroChart"></canvas></div>
+                            <div class="macro-details">
+                                <div class="macro-item"><span class="macro-label">Protein</span><span class="macro-value" id="proteinResult">0g</span><span class="macro-cal" id="proteinCal">0 cal</span></div>
+                                <div class="macro-item"><span class="macro-label">Carbs</span><span class="macro-value" id="carbsResult">0g</span><span class="macro-cal" id="carbsCal">0 cal</span></div>
+                                <div class="macro-item"><span class="macro-label">Fat</span><span class="macro-value" id="fatResult">0g</span><span class="macro-cal" id="fatCal">0 cal</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>Thực đơn mẫu</h3></div>
+                        <div class="card-body"><div class="meal-plan" id="mealPlan"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section class="section" id="reportsSection">
+                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Báo cáo</h2></div>
+                <div class="report-actions">
+                    <button class="btn btn-secondary" onclick="exportReport('clients')"><i data-lucide="download"></i>Danh sách KH</button>
+                    <button class="btn btn-secondary" onclick="exportReport('sessions')"><i data-lucide="download"></i>Lịch tập</button>
+                    <button class="btn btn-primary" onclick="exportReport('full')"><i data-lucide="file-text"></i>Tổng hợp</button>
+                </div>
+                <div class="card" style="margin-top:16px">
+                    <div class="card-header"><h3>Tổng quan</h3></div>
+                    <div class="card-body">
+                        <div class="report-stats">
+                            <div class="report-stat"><i data-lucide="users"></i><div><span class="report-stat-value" id="reportTotalClients">0</span><div class="report-stat-label">Khách hàng</div></div></div>
+                            <div class="report-stat"><i data-lucide="calendar-check"></i><div><span class="report-stat-value" id="reportTotalSessions">0</span><div class="report-stat-label">Tổng buổi</div></div></div>
+                            <div class="report-stat"><i data-lucide="trending-up"></i><div><span class="report-stat-value" id="reportAvgProgress">0%</span><div class="report-stat-label">Tiến độ TB</div></div></div>
+                            <div class="report-stat"><i data-lucide="award"></i><div><span class="report-stat-value" id="reportTopPackage">-</span><div class="report-stat-label">Gói phổ biến</div></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Tiến độ KH</h3></div>
+                    <div class="card-body" id="reportClientsList"></div>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="section" id="notificationsSection">
+                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Nhắc nhở</h2></div>
+                <div class="card">
+                    <div class="card-header"><h3>Sắp tới</h3><button class="btn btn-text" onclick="sendAllReminders()"><i data-lucide="send"></i>Gửi tất cả</button></div>
+                    <div class="card-body" id="remindersList"><div class="empty-state"><i data-lucide="bell-off"></i><p>Không có nhắc nhở</p></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Đã gửi</h3></div>
+                    <div class="card-body" id="sentRemindersList"><div class="empty-state"><i data-lucide="check-circle"></i><p>Chưa có nhắc nhở nào</p></div></div>
+                </div>
+            </section>
+        </div>
+
+        <button class="btn btn-fab" id="fabBtn" onclick="openClientModal()"><i data-lucide="plus"></i></button>
+
+        <nav class="bottom-nav">
+            <div class="bottom-nav-inner">
+                <button class="bottom-nav-item active" data-section="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+                <button class="bottom-nav-item" data-section="clients"><i data-lucide="users"></i><span>Khách</span></button>
+                <button class="bottom-nav-item" data-section="schedule"><i data-lucide="calendar"></i><span>Lịch</span></button>
+                <button class="bottom-nav-item" data-section="nutrition"><i data-lucide="utensils"></i><span>Ăn uống</span></button>
+                <button class="bottom-nav-item" data-section="packages"><i data-lucide="package"></i><span>Gói</span></button>
+                <button class="bottom-nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Báo cáo</span></button>
+            </div>
+        </nav>
+    </main>
+</div>
+
+<!-- Client Modal -->
+<div class="modal" id="clientModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="clientModalTitle">Thêm khách hàng</h2><button class="btn btn-icon" onclick="closeModal('clientModal')"><i data-lucide="x"></i></button></div>
+        <form id="clientForm">
+            <div class="modal-body">
+                <input type="hidden" id="clientId">
+                <div class="form-row">
+                    <div class="form-group"><label for="clientName">Họ và tên *</label><input type="text" id="clientName" required class="form-control"></div>
+                    <div class="form-group"><label for="clientAge">Tuổi</label><input type="number" id="clientAge" min="1" max="100" class="form-control"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="clientPhone">Số điện thoại *</label><input type="tel" id="clientPhone" required class="form-control"></div>
+                    <div class="form-group"><label for="clientPackage">Gói tập *</label><select id="clientPackage" required class="form-control"><option value="">Chọn gói</option><option value="basic">Basic - 12 buổi</option><option value="standard">Standard - 24 buổi</option><option value="vip">VIP - 48 buổi</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="clientHeight">Chiều cao (cm)</label><input type="number" id="clientHeight" min="100" max="220" class="form-control"></div>
+                    <div class="form-group"><label for="clientGoals">Mục tiêu</label><input type="text" id="clientGoals" placeholder="VD: Giảm cân" class="form-control"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" onclick="closeModal('clientModal')">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Session Modal -->
+<div class="modal" id="sessionModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="sessionModalTitle">Đặt lịch tập</h2><button class="btn btn-icon" onclick="closeModal('sessionModal')"><i data-lucide="x"></i></button></div>
+        <form id="sessionForm">
+            <div class="modal-body">
+                <input type="hidden" id="sessionId">
+                <div class="form-row">
+                    <div class="form-group"><label for="sessionClient">Khách hàng *</label><select id="sessionClient" required class="form-control"><option value="">Chọn khách hàng</option></select></div>
+                    <div class="form-group"><label for="sessionType">Loại buổi</label><select id="sessionType" class="form-control"><option value="personal">Cá nhân</option><option value="assessment">Đánh giá</option><option value="followup">Theo dõi</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="sessionDate">Ngày *</label><input type="date" id="sessionDate" required class="form-control"></div>
+                    <div class="form-group"><label for="sessionTime">Giờ *</label><input type="time" id="sessionTime" required class="form-control"></div>
+                </div>
+                <div class="form-group"><label for="sessionDuration">Thời lượng (phút)</label><select id="sessionDuration" class="form-control"><option value="30">30 phút</option><option value="45">45 phút</option><option value="60" selected>60 phút</option><option value="90">90 phút</option></select></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" onclick="closeModal('sessionModal')">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Exercise Modal -->
+<div class="modal" id="exerciseModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header"><h2>Thêm bài tập</h2><button class="btn btn-icon" onclick="closeModal('exerciseModal')"><i data-lucide="x"></i></button></div>
+        <form id="exerciseForm">
+            <div class="modal-body">
+                <input type="hidden" id="exerciseId">
+                <div class="form-row">
+                    <div class="form-group"><label for="exerciseName">Tên bài tập *</label><input type="text" id="exerciseName" required class="form-control"></div>
+                    <div class="form-group"><label for="exerciseCategory">Nhóm cơ</label><select id="exerciseCategory" class="form-control"><option value="chest">Ngực</option><option value="back">Lưng</option><option value="shoulders">Vai</option><option value="arms">Tay</option><option value="legs">Chân</option><option value="core">Bụng</option><option value="cardio">Cardio</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="exerciseSets">Số set</label><input type="number" id="exerciseSets" value="3" min="1" max="10" class="form-control"></div>
+                    <div class="form-group"><label for="exerciseReps">Reps</label><input type="text" id="exerciseReps" placeholder="VD: 8-12" class="form-control"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" onclick="closeModal('exerciseModal')">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Client Detail Modal -->
+<div class="modal" id="clientDetailModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header"><h2 id="clientDetailTitle">Chi tiết</h2><button class="btn btn-icon" onclick="closeModal('clientDetailModal')"><i data-lucide="x"></i></button></div>
+        <div class="modal-body" id="clientDetailContent"></div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" id="deleteClientBtn"><i data-lucide="trash-2"></i></button>
+            <button class="btn btn-secondary" type="button" onclick="closeModal('clientDetailModal')">Đóng</button>
+            <button class="btn btn-primary" id="editClientBtn"><i data-lucide="edit"></i>Sửa</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const DB_NAME = 'ptGymManager';
+let dataCache = null;
+let isFirebaseReady = false;
+let currentUser = null;
+let unsubscribeClients = null;
+let unsubscribeSessions = null;
+let firebaseInitialized = false;
+
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDmJQIPgYsM1hw8gIeYXgsEwCbzc4NVLRo",
+    authDomain: "pt-gym-a6e6c.firebaseapp.com",
+    projectId: "pt-gym-a6e6c",
+    storageBucket: "pt-gym-a6e6c.firebasestorage.app",
+    messagingSenderId: "510314880661",
+    appId: "1:510314880661:web:b4b2a8206311febdd6c59c",
+    measurementId: "G-ZYFWNQHH26"
+};
+
+function initFirebase() {
+    if (firebaseInitialized) return;
+    firebaseInitialized = true;
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
+    // Enable offline persistence
+    db.enablePersistence().catch((err) => {
+        console.log('Persistence error:', err.code);
+    });
+    
+    // Auth state listener
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        updateAuthUI(user);
+        if (user) {
+            loadFromFirestore();
+        } else {
+            loadFromLocalStorage();
+        }
+    });
+}
+
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).catch((error) => {
+        console.error('Sign in error:', error);
+        showToast('Đăng nhập thất bại', 'error');
+    });
+}
+
+function signOut() {
+    firebase.auth().signOut().then(() => {
+        showToast('Đã đăng xuất', 'success');
+    }).catch((error) => {
+        console.error('Sign out error:', error);
+    });
+}
+
+function updateAuthUI(user) {
+    const userNameEl = document.querySelector('.user-name');
+    const userRoleEl = document.querySelector('.user-role');
+    const authBtn = document.getElementById('authBtn');
+    
+    if (user) {
+        userNameEl.textContent = user.displayName || 'User';
+        userRoleEl.textContent = user.email;
+        authBtn.innerHTML = '<i data-lucide="log-out"></i><span>Đăng xuất</span>';
+        authBtn.onclick = signOut;
+        isFirebaseReady = true;
+    } else {
+        userNameEl.textContent = 'Personal Trainer';
+        userRoleEl.textContent = 'Quản lý';
+        authBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
+        authBtn.onclick = signInWithGoogle;
+        isFirebaseReady = false;
+    }
+    lucide.createIcons();
+}
+
+function loadFromFirestore() {
+    const db = firebase.firestore();
+    const userId = currentUser.uid;
+    
+    // Unsubscribe previous listeners
+    if (unsubscribeClients) unsubscribeClients();
+    if (unsubscribeSessions) unsubscribeSessions();
+    
+    // Real-time listener for clients
+    unsubscribeClients = db.collection('users').doc(userId).collection('clients')
+        .onSnapshot((snapshot) => {
+            const clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            dataCache = dataCache || {};
+            dataCache.clients = clients;
+            saveToLocalStorage();
+            refreshAllViews();
+        }, (error) => {
+            console.error('Clients sync error:', error);
+        });
+    
+    // Real-time listener for sessions
+    unsubscribeSessions = db.collection('users').doc(userId).collection('sessions')
+        .onSnapshot((snapshot) => {
+            const sessions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            dataCache = dataCache || {};
+            dataCache.sessions = sessions;
+            saveToLocalStorage();
+            refreshAllViews();
+        }, (error) => {
+            console.error('Sessions sync error:', error);
+        });
+    
+    // Initial load for other collections
+    db.collection('users').doc(userId).collection('measurements').get().then((snapshot) => {
+        const measurements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        dataCache = dataCache || {};
+        dataCache.measurements = measurements;
+    });
+    
+    db.collection('users').doc(userId).collection('exercises').get().then((snapshot) => {
+        const exercises = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        dataCache = dataCache || {};
+        dataCache.exercises = exercises;
+        renderExercises();
+    });
+}
+
+function loadFromLocalStorage() {
+    initDB();
+    refreshAllViews();
+}
+
+function saveToLocalStorage() {
+    if (dataCache) {
+        try {
+            localStorage.setItem(DB_NAME, JSON.stringify(dataCache));
+        } catch (e) {
+            console.warn('Cannot save to localStorage:', e);
+        }
+    }
+}
+
+function syncToFirestore(collectionName, data, docId = null) {
+    if (!isFirebaseReady || !currentUser) return Promise.resolve();
+    
+    const db = firebase.firestore();
+    const ref = db.collection('users').doc(currentUser.uid).collection(collectionName);
+    
+    if (docId) {
+        return ref.doc(docId).set(data, { merge: true });
+    } else {
+        return ref.add(data);
+    }
+}
+
+function deleteFromFirestore(collectionName, docId) {
+    if (!isFirebaseReady || !currentUser) return Promise.resolve();
+    
+    const db = firebase.firestore();
+    return db.collection('users').doc(currentUser.uid).collection(collectionName).doc(docId).delete();
+}
+
+function initDB() {
+    if (dataCache) return dataCache;
+    try {
+        const data = localStorage.getItem(DB_NAME);
+        if (!data) {
+            const initialData = {
+                clients: getSampleClients(),
+                sessions: getSampleSessions(),
+                exercises: getSampleExercises(),
+                programs: [],
+                measurements: getSampleMeasurements(),
+                notifications: []
+            };
+            saveData(initialData);
+            dataCache = initialData;
+            return initialData;
+        }
+        const parsed = JSON.parse(data);
+        if (!parsed.measurements) parsed.measurements = [];
+        if (!parsed.notifications) parsed.notifications = [];
+        if (!parsed.clients) parsed.clients = [];
+        if (!parsed.sessions) parsed.sessions = [];
+        if (!parsed.exercises) parsed.exercises = [];
+        saveData(parsed);
+        dataCache = parsed;
+        return parsed;
+    } catch (e) {
+        console.warn('localStorage error:', e);
+        // Return fresh data on error
+        const initialData = {
+            clients: getSampleClients(),
+            sessions: getSampleSessions(),
+            exercises: getSampleExercises(),
+            programs: [],
+            measurements: getSampleMeasurements(),
+            notifications: []
+        };
+        dataCache = initialData;
+        return initialData;
+    }
+}
+
+function saveData(data) {
+    dataCache = data;
+    try {
+        localStorage.setItem(DB_NAME, JSON.stringify(data));
+    } catch (e) {
+        console.warn('Cannot save to localStorage:', e);
+    }
+}
+
+function getAllData() { return initDB(); }
+
+function generateId() {
+    return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function getClients() { return getAllData().clients || []; }
+function getClientById(id) { return getClients().find(c => c.id === id); }
+
+function addClient(clientData) {
+    const data = getAllData();
+    const client = {
+        id: generateId(),
+        ...clientData,
+        sessionsRemaining: getSessionCount(clientData.package),
+        sessionsCompleted: 0,
+        height: clientData.height || null,
+        startDate: new Date().toISOString().split('T')[0],
+        createdAt: Date.now()
+    };
+    data.clients.push(client);
+    saveData(data);
+    syncToFirestore('clients', client, client.id);
+    return client;
+}
+
+function updateClient(id, clientData) {
+    const data = getAllData();
+    const index = data.clients.findIndex(c => c.id === id);
+    if (index !== -1) {
+        data.clients[index] = { ...data.clients[index], ...clientData };
+        saveData(data);
+        return data.clients[index];
+    }
+    return null;
+}
+
+function deleteClient(id) {
+    const data = getAllData();
+    data.clients = data.clients.filter(c => c.id !== id);
+    data.sessions = data.sessions.filter(s => s.clientId !== id);
+    data.measurements = data.measurements.filter(m => m.clientId !== id);
+    saveData(data);
+    deleteFromFirestore('clients', id);
+    deleteFromFirestore('sessions', id);
+    deleteFromFirestore('measurements', id);
+}
+
+function getSessionCount(pkg) {
+    switch (pkg) {
+        case 'basic': return 12;
+        case 'standard': return 24;
+        case 'vip': return 48;
+        default: return 0;
+    }
+}
+
+function getSessions() { return getAllData().sessions || []; }
+function getSessionById(id) { return getSessions().find(s => s.id === id); }
+function getSessionsByClient(clientId) { return getSessions().filter(s => s.clientId === clientId); }
+
+function getSessionsByMonth(year, month) {
+    return getSessions().filter(s => {
+        const d = new Date(s.date);
+        return d.getFullYear() === year && d.getMonth() === month;
+    });
+}
+
+function addSession(sessionData) {
+    const data = getAllData();
+    const session = {
+        id: generateId(),
+        ...sessionData,
+        status: 'scheduled',
+        reminderSent: false,
+        createdAt: Date.now()
+    };
+    data.sessions.push(session);
+    saveData(data);
+    return session;
+}
+
+function updateSession(id, sessionData) {
+    const data = getAllData();
+    const index = data.sessions.findIndex(s => s.id === id);
+    if (index !== -1) {
+        data.sessions[index] = { ...data.sessions[index], ...sessionData };
+        saveData(data);
+        return data.sessions[index];
+    }
+    return null;
+}
+
+function deleteSession(id) {
+    const data = getAllData();
+    data.sessions = data.sessions.filter(s => s.id !== id);
+    saveData(data);
+}
+
+function getMeasurements() { return getAllData().measurements || []; }
+function getMeasurementsByClient(clientId) {
+    return getMeasurements().filter(m => m.clientId === clientId).sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function addMeasurement(measurementData) {
+    const data = getAllData();
+    const m = { id: generateId(), ...measurementData, createdAt: Date.now() };
+    data.measurements.push(m);
+    saveData(data);
+    return m;
+}
+
+function getNotifications() { return getAllData().notifications || []; }
+function addNotification(notificationData) {
+    const data = getAllData();
+    const n = { id: generateId(), ...notificationData, sent: false, sentAt: null, createdAt: Date.now() };
+    data.notifications.push(n);
+    saveData(data);
+    return n;
+}
+
+function markNotificationSent(id) {
+    const data = getAllData();
+    const index = data.notifications.findIndex(n => n.id === id);
+    if (index !== -1) {
+        data.notifications[index].sent = true;
+        data.notifications[index].sentAt = Date.now();
+        saveData(data);
+        return data.notifications[index];
+    }
+    return null;
+}
+
+function getExercises() { return getAllData().exercises || []; }
+function addExercise(exerciseData) {
+    const data = getAllData();
+    const ex = { id: generateId(), ...exerciseData, createdAt: Date.now() };
+    data.exercises.push(ex);
+    saveData(data);
+    return ex;
+}
+
+function getSampleClients() {
+    return [
+        { id: 'client_1', name: 'Nguyễn Minh Tuấn', age: 28, phone: '0912345678', email: 'minhtuan@gmail.com', height: 175, goals: 'Tăng cơ, giảm mỡ', package: 'vip', sessionsRemaining: 36, sessionsCompleted: 12, startDate: '2026-06-01', notes: 'Có kinh nghiệm tập gym 2 năm', createdAt: Date.now() - 86400000 * 60 },
+        { id: 'client_2', name: 'Trần Thị Lan', age: 25, phone: '0987654321', email: 'lan.tran@gmail.com', height: 160, goals: 'Giảm cân', package: 'standard', sessionsRemaining: 18, sessionsCompleted: 6, startDate: '2026-07-01', notes: 'Người mới bắt đầu', createdAt: Date.now() - 86400000 * 30 },
+        { id: 'client_3', name: 'Lê Hoàng Nam', age: 32, phone: '0934567890', email: 'nam.le@gmail.com', height: 180, goals: 'Tăng sức mạnh', package: 'vip', sessionsRemaining: 42, sessionsCompleted: 6, startDate: '2026-07-15', notes: 'Doanh nhân', createdAt: Date.now() - 86400000 * 15 },
+        { id: 'client_4', name: 'Phạm Hương Giang', age: 23, phone: '0901234567', email: 'giang.pham@gmail.com', height: 155, goals: 'Body toning', package: 'basic', sessionsRemaining: 8, sessionsCompleted: 4, startDate: '2026-07-20', notes: 'Sinh viên', createdAt: Date.now() - 86400000 * 10 }
+    ];
+}
+
+function getSampleSessions() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const formatDate = d => d.toISOString().split('T')[0];
+    return [
+        { id: 'session_1', clientId: 'client_1', date: formatDate(today), time: '09:00', duration: 60, type: 'personal', status: 'scheduled', notes: 'Buổi tập ngực + vai' },
+        { id: 'session_2', clientId: 'client_2', date: formatDate(today), time: '11:00', duration: 45, type: 'assessment', status: 'scheduled', notes: 'Đánh giá tiến độ' },
+        { id: 'session_3', clientId: 'client_3', date: formatDate(today), time: '18:00', duration: 90, type: 'personal', status: 'scheduled', notes: 'Tập toàn thân' },
+        { id: 'session_4', clientId: 'client_4', date: formatDate(tomorrow), time: '10:00', duration: 60, type: 'personal', status: 'scheduled', notes: 'Cardio + core' },
+        { id: 'session_5', clientId: 'client_1', date: formatDate(tomorrow), time: '14:00', duration: 60, type: 'followup', status: 'scheduled', notes: 'Follow up dinh dưỡng' }
+    ];
+}
+
+function getSampleMeasurements() {
+    return [
+        { id: 'm1', clientId: 'client_1', date: '2026-06-01', weight: 78.5, chest: 96, waist: 84, hips: 98, arms: 32 },
+        { id: 'm2', clientId: 'client_1', date: '2026-06-15', weight: 77.8, chest: 97, waist: 82, hips: 97, arms: 33 },
+        { id: 'm3', clientId: 'client_1', date: '2026-07-01', weight: 76.2, chest: 98, waist: 80, hips: 96, arms: 34 },
+        { id: 'm4', clientId: 'client_1', date: '2026-07-15', weight: 75.0, chest: 99, waist: 78, hips: 95, arms: 35 },
+        { id: 'm5', clientId: 'client_1', date: '2026-08-01', weight: 74.2, chest: 100, waist: 76, hips: 94, arms: 36 },
+        { id: 'm6', clientId: 'client_2', date: '2026-07-01', weight: 62.0, chest: 84, waist: 72, hips: 90, arms: 26 },
+        { id: 'm7', clientId: 'client_2', date: '2026-07-15', weight: 61.2, chest: 84, waist: 71, hips: 89, arms: 26 },
+        { id: 'm8', clientId: 'client_2', date: '2026-08-01', weight: 60.5, chest: 85, waist: 69, hips: 88, arms: 27 },
+        { id: 'm9', clientId: 'client_4', date: '2026-07-20', weight: 48.0, chest: 78, waist: 64, hips: 82, arms: 22 },
+        { id: 'm10', clientId: 'client_4', date: '2026-08-01', weight: 47.5, chest: 78, waist: 63, hips: 81, arms: 22 }
+    ];
+}
+
+function getSampleExercises() {
+    return [
+        { id: 'ex_1', name: 'Bench Press', category: 'chest', description: 'Nằm trên ghế, đẩy tạ lên khỏi ngực', sets: 4, reps: '8-12' },
+        { id: 'ex_2', name: 'Squat', category: 'legs', description: 'Hạ người xuống như ngồi ghế', sets: 4, reps: '10-15' },
+        { id: 'ex_3', name: 'Deadlift', category: 'back', description: 'Cúi người, nâng tạ từ sàn', sets: 4, reps: '6-8' },
+        { id: 'ex_4', name: 'Shoulder Press', category: 'shoulders', description: 'Đẩy tạ từ vai lên cao', sets: 3, reps: '10-12' },
+        { id: 'ex_5', name: 'Bicep Curl', category: 'arms', description: 'Cuộn tạ từ dưới lên vai', sets: 3, reps: '12-15' },
+        { id: 'ex_6', name: 'Plank', category: 'core', description: 'Giữ tư thế chống đẩy', sets: 3, reps: '30-60s' },
+        { id: 'ex_7', name: 'Running', category: 'cardio', description: 'Chạy bộ trên máy', sets: 1, reps: '20-30 phút' },
+        { id: 'ex_8', name: 'Lat Pulldown', category: 'back', description: 'Kéo tạ từ trên xuống ngực', sets: 4, reps: '10-12' }
+    ];
+}
+
+let currentSection = 'dashboard';
+let currentMonth = new Date();
+let selectedDate = null;
+let editingClientId = null;
+let monthlyChart = null;
+let weightChart = null;
+let measurementsChart = null;
+let macroChart = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initDB();
+    initLucideIcons();
+    initEventListeners();
+    populateClientDropdowns();
+    navigateTo('dashboard');
+    renderDashboard();
+});
+
+function initLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function initEventListeners() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => navigateTo(item.dataset.section));
+    });
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        item.addEventListener('click', () => navigateTo(item.dataset.section));
+    });
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+    document.getElementById('addClientBtn').addEventListener('click', () => openClientModal());
+    document.getElementById('fabBtn').addEventListener('click', () => openClientModal());
+    document.getElementById('clientForm').addEventListener('submit', handleClientSubmit);
+    document.getElementById('sessionForm').addEventListener('submit', handleSessionSubmit);
+    document.getElementById('exerciseForm').addEventListener('submit', handleExerciseSubmit);
+    document.getElementById('clientSearch').addEventListener('input', renderClients);
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() - 1);
+        renderCalendar();
+    });
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() + 1);
+        renderCalendar();
+    });
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+        });
+    });
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', e => {
+            if (e.target.classList.contains('modal-backdrop')) {
+                closeModal(modal.id);
+            }
+        });
+    });
+    document.getElementById('editClientBtn').addEventListener('click', () => {
+        if (editingClientId) {
+            closeModal('clientDetailModal');
+            openClientModal(editingClientId);
+        }
+    });
+    document.getElementById('deleteClientBtn').addEventListener('click', () => {
+        if (editingClientId && confirm('Xóa khách hàng này?')) {
+            deleteClient(editingClientId);
+            closeModal('clientDetailModal');
+            showToast('Đã xóa', 'success');
+            refreshAllViews();
+        }
+    });
+}
+
+function navigateTo(section) {
+    currentSection = section;
+    document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.section === section);
+    });
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.toggle('active', s.id === section + 'Section');
+    });
+    const titles = {
+        dashboard: 'Dashboard',
+        clients: 'Khách hàng', packages: 'Gói tập',
+        schedule: 'Lịch tập',
+        programs: 'Bài tập',
+        measurements: 'Đo chỉ số',
+        nutrition: 'Thực đơn',
+        reports: 'Báo cáo',
+        notifications: 'Nhắc nhở'
+    };
+    document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
+    switch (section) {
+        case 'dashboard': renderDashboard(); break;
+        case 'clients': renderClients(); break;
+        case 'schedule': renderCalendar(); renderSessionsList(); break;
+        case 'packages': setTimeout(initLucideIcons, 100); break;
+        case 'programs': renderExercises(); break;
+        case 'measurements': renderMeasurementsSection(); break;
+        case 'reports': renderReportsSection(); break;
+        case 'notifications': renderRemindersSection(); break;
+    }
+    document.getElementById('sidebar').classList.remove('open');
+    setTimeout(initLucideIcons, 50);
+}
+
+function populateClientDropdowns() {
+    const clients = getClients();
+    ['sessionClient', 'measurementClient'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Chọn khách hàng --</option>';
+            clients.forEach(c => {
+                sel.innerHTML += '<option value="' + c.id + '">' + c.name + '</option>';
+            });
+        }
+    });
+}
+
+function renderDashboard() {
+    const clients = getClients();
+    const sessions = getSessions();
+    document.getElementById('totalClients').textContent = clients.length;
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    document.getElementById('weeklySessions').textContent = sessions.filter(s => {
+        const d = new Date(s.date);
+        return d >= weekStart && d <= weekEnd;
+    }).length;
+    document.getElementById('totalSessions').textContent = clients.reduce((s, c) => s + (c.sessionsCompleted || 0), 0);
+    document.getElementById('activeGoals').textContent = clients.filter(c => c.goals).length;
+    const today = new Date().toISOString().split('T')[0];
+    const todaySessions = sessions.filter(s => s.date === today);
+    document.getElementById('todayCount').textContent = todaySessions.length;
+    renderTodaySessions(todaySessions);
+    renderRecentClients(clients);
+    renderMonthlyChart(clients);
+}
+
+function renderTodaySessions(sessions) {
+    const container = document.getElementById('todaySessions');
+    if (sessions.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="calendar-x"></i><p>Không có buổi tập nào hôm nay</p></div>';
+        initLucideIcons();
+        return;
+    }
+    container.innerHTML = sessions.map(s => {
+        const c = getClientById(s.clientId);
+        return '<div class="session-item"><div class="session-time">' + s.time + '</div><div class="session-info"><div class="session-client">' + (c ? c.name : 'Unknown') + '</div><div class="session-meta">' + s.duration + ' phút</div></div><span class="session-type ' + s.type + '">' + getSessionTypeName(s.type) + '</span></div>';
+    }).join('');
+    initLucideIcons();
+}
+
+function renderRecentClients(clients) {
+    const container = document.getElementById('recentClients');
+    if (clients.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="users-round"></i><p>Chưa có khách hàng nào</p><button class="btn btn-primary" onclick="openClientModal()">Thêm khách hàng đầu tiên</button></div>';
+        initLucideIcons();
+        return;
+    }
+    container.innerHTML = '<div class="clients-grid">' + [...clients].sort((a, b) => b.createdAt - a.createdAt).slice(0, 4).map(c => renderClientCard(c)).join('') + '</div>';
+    initLucideIcons();
+}
+
+function renderMonthlyChart(clients) {
+    const ctx = document.getElementById('monthlyChart');
+    if (!ctx) return;
+    const labels = [];
+    const data = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        labels.push('T' + (d.getMonth() + 1));
+        data.push(clients.filter(c => new Date(c.startDate) <= d).reduce((s, c) => s + (c.sessionsCompleted || 0), 0));
+    }
+    if (monthlyChart) monthlyChart.destroy();
+    monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Buổi tập',
+                data: data,
+                backgroundColor: 'rgba(245,158,11,0.5)',
+                borderColor: 'rgba(245,158,11,1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
+            }
+        }
+    });
+}
+
+function renderClients() {
+    const container = document.getElementById('clientsGrid');
+    const searchTerm = document.getElementById('clientSearch').value.toLowerCase();
+    let clients = getClients();
+    if (searchTerm) clients = clients.filter(c => c.name.toLowerCase().includes(searchTerm) || (c.phone && c.phone.includes(searchTerm)));
+    if (clients.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="users-round"></i><p>' + (searchTerm ? 'Không tìm thấy' : 'Chưa có khách hàng nào') + '</p></div>';
+        initLucideIcons();
+        return;
+    }
+    container.innerHTML = clients.sort((a, b) => b.createdAt - a.createdAt).map(c => renderClientCard(c)).join('');
+    initLucideIcons();
+}
+
+function renderClientCard(client) {
+    const total = (client.sessionsCompleted || 0) + (client.sessionsRemaining || 0);
+    const progress = total > 0 ? Math.round((client.sessionsCompleted || 0) / total * 100) : 0;
+    const pkgName = { basic: 'Basic', standard: 'Standard', vip: 'VIP' };
+    return '<div class="client-card" onclick="openClientDetail(\'' + client.id + '\')"><div class="client-avatar">' + getInitials(client.name) + '</div><div class="client-name">' + client.name + '</div><span class="client-package ' + client.package + '">' + (pkgName[client.package] || 'N/A') + '</span><div class="client-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div><div class="progress-text">' + (client.sessionsRemaining || 0) + ' buổi còn lại</div></div></div>';
+}
+
+function openClientDetail(clientId) {
+    const client = getClientById(clientId);
+    if (!client) return;
+    editingClientId = clientId;
+    const pkgName = { basic: 'Basic', standard: 'Standard', vip: 'VIP' };
+    document.getElementById('clientDetailTitle').textContent = client.name;
+    document.getElementById('clientDetailContent').innerHTML = '<div class="client-detail-header"><div class="client-detail-avatar">' + getInitials(client.name) + '</div><div class="client-detail-info"><h3>' + client.name + '</h3><p>' + (client.age ? client.age + ' tuổi' : '') + ' ' + (client.phone ? '• ' + client.phone : '') + '</p><span class="client-package ' + client.package + '">' + (pkgName[client.package] || 'N/A') + '</span></div></div><div class="client-detail-stats"><div class="client-stat"><div class="client-stat-value">' + (client.sessionsCompleted || 0) + '</div><div class="client-stat-label">Hoàn thành</div></div><div class="client-stat"><div class="client-stat-value">' + (client.sessionsRemaining || 0) + '</div><div class="client-stat-label">Còn lại</div></div><div class="client-stat"><div class="client-stat-value">' + (client.height || '-') + '</div><div class="client-stat-label">Chiều cao</div></div></div><div class="client-detail-section"><h4>Mục tiêu</h4><p>' + (client.goals || 'Chưa có mục tiêu') + '</p></div><div class="client-detail-section"><h4>Liên hệ</h4><p>' + (client.phone ? '<strong>ĐT:</strong> ' + client.phone + '<br>' : '') + (client.email ? '<strong>Email:</strong> ' + client.email : '') + '</p></div>' + (client.notes ? '<div class="client-detail-section"><h4>Ghi chú</h4><p>' + client.notes + '</p></div>' : '');
+    openModal('clientDetailModal');
+    initLucideIcons();
+}
+
+function openClientModal(clientId) {
+    editingClientId = clientId;
+    const form = document.getElementById('clientForm');
+    form.reset();
+    if (clientId) {
+        const c = getClientById(clientId);
+        if (c) {
+            document.getElementById('clientModalTitle').textContent = 'Chỉnh sửa';
+            document.getElementById('clientId').value = c.id;
+            document.getElementById('clientName').value = c.name || '';
+            document.getElementById('clientAge').value = c.age || '';
+            document.getElementById('clientPhone').value = c.phone || '';
+            document.getElementById('clientPackage').value = c.package || '';
+            document.getElementById('clientHeight').value = c.height || '';
+            document.getElementById('clientGoals').value = c.goals || '';
+        }
+    } else {
+        document.getElementById('clientModalTitle').textContent = 'Thêm khách hàng';
+        document.getElementById('clientId').value = '';
+    }
+    openModal('clientModal');
+}
+
+function handleClientSubmit(e) {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById('clientName').value.trim(),
+        age: parseInt(document.getElementById('clientAge').value) || null,
+        phone: document.getElementById('clientPhone').value.trim(),
+        email: '',
+        height: parseFloat(document.getElementById('clientHeight').value) || null,
+        package: document.getElementById('clientPackage').value,
+        goals: document.getElementById('clientGoals').value.trim(),
+        notes: ''
+    };
+    if (editingClientId) {
+        updateClient(editingClientId, data);
+        showToast('Đã cập nhật', 'success');
+    } else {
+        addClient(data);
+        showToast('Đã thêm khách hàng', 'success');
+    }
+    closeModal('clientModal');
+    populateClientDropdowns();
+    refreshAllViews();
+}
+
+function renderCalendar() {
+    const container = document.getElementById('calendarGrid');
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+    document.getElementById('currentMonth').textContent = monthNames[month] + ', ' + year;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    const sessions = getSessionsByMonth(year, month);
+    const todayStr = new Date().toISOString().split('T')[0];
+    let html = '';
+    for (let i = firstDay - 1; i >= 0; i--) html += '<div class="calendar-day other-month"><span class="day-number">' + (daysInPrevMonth - i) + '</span></div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        const daySessions = sessions.filter(s => s.date === dateStr);
+        html += '<div class="calendar-day ' + (dateStr === todayStr ? 'today' : '') + '" onclick="selectDate(\'' + dateStr + '\')"><span class="day-number">' + day + '</span><div class="day-sessions">' + daySessions.slice(0, 3).map(s => {
+            const c = getClientById(s.clientId);
+            return '<div class="day-session">' + (c ? c.name.split(' ')[0] : '?') + '</div>';
+        }).join('') + '</div></div>';
+    }
+    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+    for (let i = 1; i <= totalCells - (firstDay + daysInMonth); i++) html += '<div class="calendar-day other-month"><span class="day-number">' + i + '</span></div>';
+    container.innerHTML = html;
+}
+
+function selectDate(dateStr) {
+    selectedDate = dateStr;
+    document.getElementById('sessionDate').value = dateStr;
+    openSessionModal();
+}
+
+function renderSessionsList() {
+    const container = document.getElementById('sessionsList');
+    const sessions = getSessionsByMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+    if (sessions.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="calendar-x"></i><p>Chưa có lịch tập nào</p></div>';
+        initLucideIcons();
+        return;
+    }
+    sessions.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+    container.innerHTML = sessions.map(s => {
+        const c = getClientById(s.clientId);
+        return '<div class="session-item"><div class="session-time">' + s.time + '</div><div class="session-info"><div class="session-client">' + (c ? c.name : 'Unknown') + '</div><div class="session-meta">' + formatDate(s.date) + ' • ' + s.duration + ' phút</div></div><span class="session-type ' + s.type + '">' + getSessionTypeName(s.type) + '</span><button class="btn btn-icon" onclick="event.stopPropagation();deleteSessionById(\'' + s.id + '\')"><i data-lucide="trash-2"></i></button></div>';
+    }).join('');
+    initLucideIcons();
+}
+
+function openSessionModal() {
+    const form = document.getElementById('sessionForm');
+    form.reset();
+    const sel = document.getElementById('sessionClient');
+    sel.innerHTML = '<option value="">Chọn khách hàng</option>' + getClients().map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('');
+    document.getElementById('sessionDate').value = selectedDate || new Date().toISOString().split('T')[0];
+    document.getElementById('sessionTime').value = '09:00';
+    openModal('sessionModal');
+}
+
+function handleSessionSubmit(e) {
+    e.preventDefault();
+    const data = {
+        clientId: document.getElementById('sessionClient').value,
+        type: document.getElementById('sessionType').value,
+        date: document.getElementById('sessionDate').value,
+        time: document.getElementById('sessionTime').value,
+        duration: parseInt(document.getElementById('sessionDuration').value),
+        notes: ''
+    };
+    addSession(data);
+    showToast('Đã thêm lịch tập', 'success');
+    closeModal('sessionModal');
+    selectedDate = null;
+    refreshAllViews();
+}
+
+function deleteSessionById(id) {
+    if (confirm('Xóa lịch tập này?')) {
+        deleteSession(id);
+        showToast('Đã xóa', 'success');
+        refreshAllViews();
+    }
+}
+
+function renderExercises() {
+    const container = document.getElementById('exercisesGrid');
+    const exercises = getExercises();
+    const catNames = { chest: 'Ngực', back: 'Lưng', shoulders: 'Vai', arms: 'Tay', legs: 'Chân', core: 'Bụng', cardio: 'Cardio' };
+    if (exercises.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i data-lucide="dumbbell"></i><p>Chưa có bài tập nào</p></div>';
+        initLucideIcons();
+        return;
+    }
+    container.innerHTML = exercises.map(ex => '<div class="exercise-card"><div class="exercise-header"><div class="exercise-icon"><i data-lucide="dumbbell"></i></div><span class="exercise-category">' + (catNames[ex.category] || ex.category) + '</span></div><div class="exercise-name">' + ex.name + '</div><div class="exercise-meta"><span><i data-lucide="layers"></i> ' + ex.sets + ' sets</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div></div>').join('');
+    initLucideIcons();
+}
+
+function openExerciseModal() {
+    const form = document.getElementById('exerciseForm');
+    form.reset();
+    document.getElementById('exerciseId').value = '';
+    openModal('exerciseModal');
+}
+
+function handleExerciseSubmit(e) {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById('exerciseName').value.trim(),
+        category: document.getElementById('exerciseCategory').value,
+        sets: parseInt(document.getElementById('exerciseSets').value),
+        reps: document.getElementById('exerciseReps').value.trim(),
+        description: ''
+    };
+    addExercise(data);
+    showToast('Đã thêm bài tập', 'success');
+    closeModal('exerciseModal');
+    renderExercises();
+}
+
+function renderMeasurementsSection() {
+    const sel = document.getElementById('measurementClient');
+    if (sel.options.length <= 1) populateClientDropdowns();
+}
+
+function renderMeasurementHistory() {
+    const clientId = document.getElementById('measurementClient').value;
+    const content = document.getElementById('measurementContent');
+    if (!clientId) {
+        content.style.display = 'none';
+        return;
+    }
+    content.style.display = 'block';
+    const measurements = getMeasurementsByClient(clientId);
+    renderWeightChart(measurements);
+    renderMeasurementsChart(measurements);
+}
+
+function renderWeightChart(measurements) {
+    const ctx = document.getElementById('weightChart');
+    if (!ctx || measurements.length === 0) return;
+    if (weightChart) weightChart.destroy();
+    weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: measurements.map(m => formatDate(m.date)),
+            datasets: [{
+                label: 'Cân nặng',
+                data: measurements.map(m => m.weight),
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245,158,11,0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
+            }
+        }
+    });
+}
+
+function renderMeasurementsChart(measurements) {
+    const ctx = document.getElementById('measurementsChart');
+    if (!ctx || measurements.length === 0) return;
+    if (measurementsChart) measurementsChart.destroy();
+    measurementsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: measurements.map(m => formatDate(m.date)),
+            datasets: [
+                { label: 'Ngực', data: measurements.map(m => m.chest), borderColor: '#3b82f6', tension: 0.3 },
+                { label: 'Eo', data: measurements.map(m => m.waist), borderColor: '#ef4444', tension: 0.3 },
+                { label: 'Mông', data: measurements.map(m => m.hips), borderColor: '#22c55e', tension: 0.3 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#a1a1aa' } } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
+            }
+        }
+    });
+}
+
+function calculateNutrition() {
+    const age = parseInt(document.getElementById('nutritionAge').value);
+    const gender = document.getElementById('nutritionGender').value;
+    const height = parseFloat(document.getElementById('nutritionHeight').value);
+    const weight = parseFloat(document.getElementById('nutritionWeight').value);
+    const goal = document.getElementById('nutritionGoal').value;
+    const activity = document.getElementById('nutritionActivity').value;
+    let bmr = gender === 'male' ? 10 * weight + 6.25 * height - 5 * age + 5 : 10 * weight + 6.25 * height - 5 * age - 161;
+    const actMult = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725 };
+    const tdee = Math.round(bmr * actMult[activity]);
+    const targetCal = goal === 'cut' ? Math.round(tdee * 0.8) : goal === 'bulk' ? Math.round(tdee * 1.15) : tdee;
+    const proteinRatio = goal === 'cut' ? 0.40 : 0.30;
+    const fatRatio = 0.25;
+    const protein = Math.round((targetCal * proteinRatio) / 4);
+    const fat = Math.round((targetCal * fatRatio) / 9);
+    const carbs = Math.round(((targetCal - protein * 4 - fat * 9) / 4));
+    document.getElementById('bmrResult').textContent = Math.round(bmr);
+    document.getElementById('tdeeResult').textContent = tdee;
+    document.getElementById('targetCalResult').textContent = targetCal;
+    document.getElementById('proteinResult').textContent = protein + 'g';
+    document.getElementById('proteinCal').textContent = protein * 4 + ' cal';
+    document.getElementById('carbsResult').textContent = carbs + 'g';
+    document.getElementById('carbsCal').textContent = carbs * 4 + ' cal';
+    document.getElementById('fatResult').textContent = fat + 'g';
+    document.getElementById('fatCal').textContent = fat * 9 + ' cal';
+    renderMacroChart(protein * 4, carbs * 4, fat * 9);
+    renderMealPlan(targetCal);
+    document.getElementById('nutritionResults').style.display = 'block';
+}
+
+function renderMacroChart(proteinCal, carbsCal, fatCal) {
+    const ctx = document.getElementById('macroChart');
+    if (!ctx) return;
+    if (macroChart) macroChart.destroy();
+    macroChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Protein', 'Carbs', 'Fat'],
+            datasets: [{
+                data: [proteinCal, carbsCal, fatCal],
+                backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } }
+        }
+    });
+}
+
+function renderMealPlan(targetCal) {
+    const container = document.getElementById('mealPlan');
+    container.innerHTML = '<div class="meal-item"><h4><i data-lucide="sunrise"></i> Bữa sáng (' + Math.round(targetCal * 0.25) + ' cal)</h4><ul><li>2 trứng + yến mạch</li><li>1 quả chuối</li></ul></div><div class="meal-item"><h4><i data-lucide="sun"></i> Bữa trưa (' + Math.round(targetCal * 0.35) + ' cal)</h4><ul><li>150g ức gà</li><li>1 chén cơm gạo lứt</li><li>Rau xanh</li></ul></div><div class="meal-item"><h4><i data-lucide="moon"></i> Bữa tối (' + Math.round(targetCal * 0.25) + ' cal)</h4><ul><li>150g cá hồi</li><li>Khoai lang</li></ul></div><div class="meal-item"><h4><i data-lucide="coffee"></i> Snacks (' + Math.round(targetCal * 0.15) + ' cal)</h4><ul><li>Hạt hỗn hợp</li><li>1 quả táo</li></ul></div>';
+    initLucideIcons();
+}
+
+function renderReportsSection() {
+    const clients = getClients();
+    document.getElementById('reportTotalClients').textContent = clients.length;
+    document.getElementById('reportTotalSessions').textContent = clients.reduce((s, c) => s + (c.sessionsCompleted || 0), 0);
+    const avgProgress = clients.length > 0 ? Math.round(clients.reduce((s, c) => {
+        const total = (c.sessionsCompleted || 0) + (c.sessionsRemaining || 0);
+        return s + (total > 0 ? (c.sessionsCompleted || 0) / total * 100 : 0);
+    }, 0) / clients.length) : 0;
+    document.getElementById('reportAvgProgress').textContent = avgProgress + '%';
+    const pkgs = clients.reduce((acc, c) => { acc[c.package] = (acc[c.package] || 0) + 1; return acc; }, {});
+    const topPkg = Object.keys(pkgs).sort((a, b) => pkgs[b] - pkgs[a])[0];
+    document.getElementById('reportTopPackage').textContent = { basic: 'Basic', standard: 'Standard', vip: 'VIP' }[topPkg] || '-';
+    const list = document.getElementById('reportClientsList');
+    if (clients.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Chưa có khách hàng</p>';
+        return;
+    }
+    list.innerHTML = clients.map(c => {
+        const total = (c.sessionsCompleted || 0) + (c.sessionsRemaining || 0);
+        const progress = total > 0 ? Math.round((c.sessionsCompleted || 0) / total * 100) : 0;
+        return '<div class="report-client-item"><div class="report-client-avatar">' + getInitials(c.name) + '</div><div class="report-client-info"><div class="report-client-name">' + c.name + '</div><div class="report-client-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div><span class="report-progress-text">' + (c.sessionsCompleted || 0) + '/' + total + ' (' + progress + '%)</span></div></div></div>';
+    }).join('');
+}
+
+function exportReport(type) {
+    const clients = getClients();
+    const sessions = getSessions();
+    let content = '';
+    let filename = '';
+    if (type === 'clients') {
+        filename = 'danh_sach_khach_hang.txt';
+        content = 'DANH SÁCH KHÁCH HÀNG\n' + '='.repeat(40) + '\n\n';
+        clients.forEach((c, i) => {
+            content += (i + 1) + '. ' + c.name + '\n   ĐT: ' + (c.phone || '-') + '\n   Gói: ' + c.package.toUpperCase() + '\n   Buổi: ' + c.sessionsCompleted + '/' + ((c.sessionsCompleted || 0) + (c.sessionsRemaining || 0)) + '\n\n';
+        });
+    } else if (type === 'sessions') {
+        filename = 'lich_tap.txt';
+        content = 'LỊCH TẬP\n' + '='.repeat(40) + '\n\n';
+        sessions.sort((a, b) => a.date.localeCompare(b.date)).forEach((s, i) => {
+            const c = getClientById(s.clientId);
+            content += (i + 1) + '. ' + formatDate(s.date) + ' - ' + s.time + '\n   Khách: ' + (c ? c.name : '-') + '\n   Loại: ' + getSessionTypeName(s.type) + '\n\n';
+        });
+    } else {
+        filename = 'bao_cao_tong_hop.txt';
+        content = 'BÁO CÁO PT GYM\n' + '='.repeat(40) + '\nNgày: ' + new Date().toLocaleDateString('vi-VN') + '\n\nTổng KH: ' + clients.length + '\nTổng buổi: ' + clients.reduce((s, c) => s + (c.sessionsCompleted || 0), 0) + '\n\nCHI TIẾT\n' + '-'.repeat(30) + '\n';
+        clients.forEach((c, i) => {
+            content += '\n' + (i + 1) + '. ' + c.name + '\n   ĐT: ' + (c.phone || '-') + '\n   Gói: ' + c.package.toUpperCase() + '\n   Đã tập: ' + (c.sessionsCompleted || 0) + ' buổi\n   Còn: ' + (c.sessionsRemaining || 0) + ' buổi\n';
+        });
+    }
+    downloadTextFile(content, filename);
+    showToast('Đã xuất báo cáo', 'success');
+}
+
+function downloadTextFile(content, filename) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function renderRemindersSection() {
+    const sessions = getSessions().filter(s => s.status === 'scheduled');
+    const today = new Date();
+    const upcoming = sessions.filter(s => new Date(s.date) >= today).sort((a, b) => a.date.localeCompare(b.date));
+    const list = document.getElementById('remindersList');
+    if (upcoming.length === 0) {
+        list.innerHTML = '<div class="empty-state"><i data-lucide="bell-off"></i><p>Không có lịch tập sắp tới</p></div>';
+    } else {
+        list.innerHTML = upcoming.slice(0, 10).map(s => {
+            const c = getClientById(s.clientId);
+            return '<div class="reminder-item"><div class="reminder-icon"><i data-lucide="calendar"></i></div><div class="reminder-info"><div class="reminder-client">' + (c ? c.name : 'Unknown') + '</div><div class="reminder-details">' + formatDate(s.date) + ' lúc ' + s.time + '</div></div><button class="btn btn-secondary" onclick="sendSingleReminder(\'' + s.id + '\')"><i data-lucide="send"></i></button></div>';
+        }).join('');
+    }
+    const sent = document.getElementById('sentRemindersList');
+    const sentReminders = getNotifications().filter(n => n.sent);
+    if (sentReminders.length === 0) {
+        sent.innerHTML = '<div class="empty-state"><i data-lucide="check-circle"></i><p>Chưa có nhắc nhở nào</p></div>';
+    } else {
+        sent.innerHTML = sentReminders.slice(0, 10).map(n => {
+            const c = getClientById(n.clientId);
+            return '<div class="sent-item"><i data-lucide="check-circle"></i><span class="sent-item-info">Nhắc ' + (c ? c.name : '-') + '</span><span class="sent-time">' + (n.sentAt ? new Date(n.sentAt).toLocaleString('vi-VN') : '') + '</span></div>';
+        }).join('');
+    }
+    initLucideIcons();
+}
+
+function sendSingleReminder(sessionId) {
+    const session = getSessionById(sessionId);
+    const c = getClientById(session.clientId);
+    if (!c) {
+        showToast('Không tìm thấy', 'error');
+        return;
+    }
+    addNotification({ clientId: session.clientId, sessionId: session.id, sessionType: session.type, type: 'sms', message: 'Nhắc nhở lịch tập ngày ' + formatDate(session.date) });
+    const n = getNotifications()[getNotifications().length - 1];
+    setTimeout(() => {
+        markNotificationSent(n.id);
+        showToast('Đã gửi nhắc nhở đến ' + c.name, 'success');
+        renderRemindersSection();
+    }, 1000);
+}
+
+function sendAllReminders() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowSessions = getSessions().filter(s => s.date === tomorrowStr && s.status === 'scheduled');
+    if (tomorrowSessions.length === 0) {
+        showToast('Không có lịch nào ngày mai', 'error');
+        return;
+    }
+    let sent = 0;
+    tomorrowSessions.forEach(s => {
+        const c = getClientById(s.clientId);
+        if (c) {
+            addNotification({ clientId: s.clientId, sessionId: s.id, sessionType: s.type, type: 'sms', message: 'Nhắc lịch tập ngày mai' });
+            const n = getNotifications()[getNotifications().length - 1];
+            markNotificationSent(n.id);
+            sent++;
+        }
+    });
+    showToast('Đã gửi ' + sent + ' nhắc nhở', 'success');
+    renderRemindersSection();
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function getInitials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    return parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+}
+
+function getSessionTypeName(type) {
+    return { personal: 'Cá nhân', assessment: 'Đánh giá', followup: 'Theo dõi' }[type] || type;
+}
+
+function refreshAllViews() {
+    populateClientDropdowns();
+    renderDashboard();
+    renderClients();
+    renderCalendar();
+    renderSessionsList();
+    renderExercises();
+    renderMeasurementsSection();
+    renderReportsSection();
+    renderRemindersSection();
+}
+
+function showToast(msg, type) {
+    type = type || 'success';
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.innerHTML = '<i data-lucide="' + (type === 'success' ? 'check-circle' : 'alert-circle') + '" class="toast-icon"></i><span class="toast-message">' + msg + '</span>';
+    container.appendChild(toast);
+    initLucideIcons();
+    setTimeout(function() {
+        toast.style.animation = 'toastSlide 0.3s ease reverse';
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
+}
+
+
+function selectPackage(packageType) { document.getElementById('clientPackage').value = packageType; navigateTo('clients'); showToast('Đã chọn gói ' + packageType.toUpperCase() + '. Thêm khách hàng mới.', 'success'); setTimeout(() => openClientModal(), 500); }
+window.navigateTo = navigateTo;
+window.openClientModal = openClientModal;
+window.openClientDetail = openClientDetail;
+window.openSessionModal = openSessionModal;
+window.openExerciseModal = openExerciseModal;
+window.closeModal = closeModal;
+window.selectDate = selectDate;
+window.deleteSessionById = deleteSessionById;
+window.renderMeasurementHistory = renderMeasurementHistory;
+window.calculateNutrition = calculateNutrition;
+window.exportReport = exportReport;
+window.sendSingleReminder = sendSingleReminder;
+window.sendAllReminders = sendAllReminders;
+
+// Load Firebase SDK via script tags
+(function loadFirebaseSDK() {
+    // Firebase App
+    var appScript = document.createElement('script');
+    appScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+    appScript.onload = loadFirestore;
+    document.body.appendChild(appScript);
+    
+    function loadFirestore() {
+        var firestoreScript = document.createElement('script');
+        firestoreScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+        firestoreScript.onload = loadAuth;
+        document.body.appendChild(firestoreScript);
+    }
+    
+    function loadAuth() {
+        var authScript = document.createElement('script');
+        authScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+        authScript.onload = initFirebase;
+        document.body.appendChild(authScript);
+    }
+})();
+</script>
+</body>
+</html>
