@@ -1939,11 +1939,11 @@ function renderExercisesGrid(exercises, catNames, container) {
     const grid = document.getElementById('exercisesGrid');
     grid.innerHTML = exercises.map(ex => {
         const hasMedia = ex.videoUrl || ex.imageUrl;
-        const mediaHtml = ex.videoUrl 
-            ? '<div style="position:relative;margin:-16px -16px 12px -16px"><img style="width:100%;height:120px;object-fit:cover" src="' + (ex.imageUrl || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400') + '" alt="' + ex.name + '"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(239,68,68,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>'
+        const mediaHtml = ex.videoUrl
+            ? '<div style="position:relative;margin:-16px -16px 12px -16px"><img style="width:100%;height:120px;object-fit:cover" src="' + (ex.imageUrl || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400') + '" alt="' + ex.name + '"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(239,68,68,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation(); openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\\'") + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>'
             : (ex.imageUrl ? '<img style="width:100%;height:120px;object-fit:cover;margin:-16px -16px 12px -16px;border-radius:12px 12px 0 0" src="' + ex.imageUrl + '" alt="' + ex.name + '">' : '');
-        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><i data-lucide="play"></i></button>' : '';
-        return '<div class="exercise-card' + (hasMedia ? ' has-media' : '') + '">' + mediaHtml + '<div class="exercise-header"><div class="exercise-icon"><i data-lucide="dumbbell"></i></div><span class="exercise-category">' + (catNames[ex.category] || ex.category) + '</span></div><div class="exercise-name">' + ex.name + '</div><div class="exercise-meta"><span><i data-lucide="layers"></i> ' + ex.sets + '</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div><div class="exercise-actions" style="gap:4px;margin-top:10px">' + playBtn + '<button class="edit-btn" style="flex:1" onclick="openExerciseModal(\'' + ex.id + '\')"><i data-lucide="edit-2"></i></button></div></div>';
+        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="event.stopPropagation(); openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\\'") + '\')"><i data-lucide="play"></i></button>' : '';
+        return '<div class="exercise-card' + (hasMedia ? ' has-media' : '') + '" onclick="openExerciseModal(\'' + ex.id + '\')">' + mediaHtml + '<div class="exercise-header"><div class="exercise-icon"><i data-lucide="dumbbell"></i></div><span class="exercise-category">' + (catNames[ex.category] || ex.category) + '</span></div><div class="exercise-name">' + ex.name + '</div><div class="exercise-meta"><span><i data-lucide="layers"></i> ' + ex.sets + '</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div><div class="exercise-actions" style="gap:4px;margin-top:10px">' + playBtn + '<button class="edit-btn" style="flex:1" onclick="event.stopPropagation(); openExerciseModal(\'' + ex.id + '\')"><i data-lucide="edit-2"></i></button></div></div>';
     }).join('');
 }
 
@@ -1951,10 +1951,10 @@ function renderExercisesList(exercises, catNames, container) {
     container.innerHTML = '<div class="exercises-list" id="exercisesList"></div>';
     const list = document.getElementById('exercisesList');
     list.innerHTML = exercises.map(ex => {
-        const thumb = ex.imageUrl 
+        const thumb = ex.imageUrl
             ? '<img class="thumb" src="' + ex.imageUrl + '" alt="' + ex.name + '">'
             : '<div class="thumb-placeholder"><i data-lucide="dumbbell"></i></div>';
-        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><i data-lucide="play"></i></button>' : '';
+        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="event.stopPropagation(); openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\\'") + '\')"><i data-lucide="play"></i></button>' : '';
         return '<div class="exercise-list-item" onclick="openExerciseModal(\'' + ex.id + '\')">' + thumb + '<div class="info"><div class="name">' + ex.name + '</div><div class="meta"><span class="exercise-category" style="padding:2px 6px;font-size:10px">' + (catNames[ex.category] || ex.category) + '</span><span><i data-lucide="layers"></i> ' + ex.sets + ' sets</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div></div>' + playBtn + '</div>';
     }).join('');
 }
