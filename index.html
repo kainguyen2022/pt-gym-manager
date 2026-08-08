@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0f0f14">
-    <title>PT Gym Manager</title>
+    <title>PT Manager</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
@@ -294,7 +294,7 @@ canvas{max-width:100%}
                     <circle cx="8" cy="20" r="6" fill="var(--accent-primary)"/>
                     <circle cx="32" cy="20" r="6" fill="var(--accent-primary)"/>
                 </svg>
-                <span class="logo-text">PT GYM</span>
+                <span class="logo-text">PT Manager</span>
             </div>
         </div>
         <nav class="sidebar-nav">
@@ -1700,7 +1700,7 @@ function exportReport(type) {
         });
     } else {
         filename = 'bao_cao_tong_hop.txt';
-        content = 'BÁO CÁO PT GYM\n' + '='.repeat(40) + '\nNgày: ' + new Date().toLocaleDateString('vi-VN') + '\n\nTổng KH: ' + clients.length + '\nTổng buổi: ' + clients.reduce((s, c) => s + (c.sessionsCompleted || 0), 0) + '\n\nCHI TIẾT\n' + '-'.repeat(30) + '\n';
+        content = 'BÁO CÁO PT Manager\n' + '='.repeat(40) + '\nNgày: ' + new Date().toLocaleDateString('vi-VN') + '\n\nTổng KH: ' + clients.length + '\nTổng buổi: ' + clients.reduce((s, c) => s + (c.sessionsCompleted || 0), 0) + '\n\nCHI TIẾT\n' + '-'.repeat(30) + '\n';
         clients.forEach((c, i) => {
             content += '\n' + (i + 1) + '. ' + c.name + '\n   ĐT: ' + (c.phone || '-') + '\n   Gói: ' + c.package.toUpperCase() + '\n   Đã tập: ' + (c.sessionsCompleted || 0) + ' buổi\n   Còn: ' + (c.sessionsRemaining || 0) + ' buổi\n';
         });
