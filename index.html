@@ -1044,19 +1044,22 @@ function loadFromFirestore() {
 }
 
 function loadFromLocalStorage() {
-    // Clear any shared/old data keys that don't belong to current user
+    // Clear ALL ptGymManager keys when logging out
     dataCache = null;
-    
-    // Clear all ptGymManager keys except current user's
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('ptGymManager') && key !== getDBName()) {
+        if (key && key.startsWith('ptGymManager')) {
             keysToRemove.push(key);
         }
     }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
+    keysToRemove.forEach(key => {
+        console.log('Clearing localStorage key:', key);
+        localStorage.removeItem(key);
+    });
     
+    // Force reinitialize with fresh sample data
+    localStorage.removeItem(getDBName());
     initDB();
     refreshAllViews();
 }
@@ -1097,7 +1100,7 @@ function initDB() {
         const data = localStorage.getItem(getDBName());
         if (!data) {
             const initialData = {
-                clients: getSampleClients(),
+                clients: [],
                 sessions: getSampleSessions(),
                 exercises: getSampleExercises(),
                 programs: [],
