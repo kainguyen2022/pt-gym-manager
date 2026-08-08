@@ -261,8 +261,11 @@ canvas{max-width:100%}
 .package-card:hover{transform:translateY(-4px);border-color:var(--accent-primary);box-shadow:var(--shadow-glow)}
 .package-card.featured{border-color:var(--accent-primary);background:linear-gradient(135deg,rgba(245,158,11,0.05),transparent)}
 .package-card.featured::before{content:'Phổ biến nhất';position:absolute;top:12px;right:-30px;background:var(--accent-primary);color:var(--bg-primary);font-size:10px;font-weight:700;padding:4px 40px;transform:rotate(45deg)}
+.package-card.admin-mode{border-color:var(--warning)}
 .package-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.package-header-left{flex:1}
 .package-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text-primary)}
+.package-sessions{font-size:13px;color:var(--text-muted);margin-top:4px}
 .package-price{text-align:right}
 .package-price .amount{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:var(--accent-primary)}
 .package-price .period{font-size:12px;color:var(--text-muted)}
@@ -276,6 +279,12 @@ canvas{max-width:100%}
 .package-cta:hover{background:var(--accent-primary);color:var(--bg-primary)}
 .package-card.featured .package-cta{background:var(--accent-primary);color:var(--bg-primary)}
 .package-card.featured .package-cta:hover{background:var(--accent-secondary)}
+.package-admin-actions{position:absolute;top:10px;left:10px;display:none;gap:8px}
+.package-card.admin-mode:hover .package-admin-actions{display:flex}
+.package-admin-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.package-admin-btn.edit{background:var(--accent-primary);color:var(--bg-primary)}
+.package-admin-btn.delete{background:var(--danger);color:white}
+.admin-toggle-btn{margin-left:auto}
 .comparison-table{width:100%;border-collapse:collapse;font-size:13px;overflow-x:auto;display:block}
 .comparison-table th,.comparison-table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
 .comparison-table th{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;background:var(--bg-secondary)}
@@ -399,66 +408,12 @@ canvas{max-width:100%}
             
             <!-- Packages Section -->
             <section class="section" id="packagesSection">
-                <div class="section-toolbar"><h2 style="font-family:'Bebas Neue',letter-spacing:1px">Gói tập</h2></div>
-                
-                <div class="packages-grid" id="packagesGrid">
-                    <div class="package-card">
-                        <div class="package-header">
-                            <div class="package-name">BASIC</div>
-                            <div class="package-price"><span class="amount">1.500K</span><span class="period">/tháng</span></div>
-                        </div>
-                        <div class="package-description">Phù hợp cho người mới bắt đầu tập gym, muốn trải nghiệm dịch vụ PT.</div>
-                        <ul class="package-features">
-                            <li><i data-lucide="check"></i> 12 buổi tập mỗi tháng</li>
-                            <li><i data-lucide="check"></i> Lịch tập cơ bản</li>
-                            <li><i data-lucide="check"></i> Hướng dẫn tư thế tập</li>
-                            <li><i data-lucide="check"></i> Theo dõi tiến độ đơn giản</li>
-                            <li><i data-lucide="check"></i> Tư vấn dinh dưỡng cơ bản</li>
-                            <li class="disabled"><i data-lucide="x"></i> Kế hoạch tập cá nhân hóa</li>
-                            <li class="disabled"><i data-lucide="x"></i> Đo chỉ số chi tiết</li>
-                            <li class="disabled"><i data-lucide="x"></i> Hỗ trợ 24/7</li>
-                        </ul>
-                        <button class="package-cta" onclick="selectPackage('basic')">Chọn Basic</button>
-                    </div>
-
-                    <div class="package-card featured">
-                        <div class="package-header">
-                            <div class="package-name">STANDARD</div>
-                            <div class="package-price"><span class="amount">2.800K</span><span class="period">/tháng</span></div>
-                        </div>
-                        <div class="package-description">Gói phổ biến nhất, phù hợp với người có mục tiêu rõ ràng và cam kết tập luyện.</div>
-                        <ul class="package-features">
-                            <li><i data-lucide="check"></i> 24 buổi tập mỗi tháng</li>
-                            <li><i data-lucide="check"></i> Lịch tập cá nhân hóa</li>
-                            <li><i data-lucide="check"></i> Điều chỉnh bài tập theo tiến độ</li>
-                            <li><i data-lucide="check"></i> Đo chỉ số cơ thể hàng tháng</li>
-                            <li><i data-lucide="check"></i> Tư vấn dinh dưỡng chi tiết</li>
-                            <li><i data-lucide="check"></i> Đánh giá định kỳ hàng tháng</li>
-                            <li><i data-lucide="check"></i> Hỗ trợ qua tin nhắn</li>
-                            <li class="disabled"><i data-lucide="x"></i> Kế hoạch 1-1 hoàn toàn</li>
-                        </ul>
-                        <button class="package-cta" onclick="selectPackage('standard')">Chọn Standard</button>
-                    </div>
-
-                    <div class="package-card">
-                        <div class="package-header">
-                            <div class="package-name">VIP</div>
-                            <div class="package-price"><span class="amount">5.000K</span><span class="period">/tháng</span></div>
-                        </div>
-                        <div class="package-description">Dành cho khách hàng cam kết dài hạn, muốn kết quả tối ưu nhất.</div>
-                        <ul class="package-features">
-                            <li><i data-lucide="check"></i> 48 buổi tập mỗi tháng</li>
-                            <li><i data-lucide="check"></i> Kế hoạch tập 1-1 hoàn toàn</li>
-                            <li><i data-lucide="check"></i> Đo chỉ số + đánh giá 2 lần/tuần</li>
-                            <li><i data-lucide="check"></i> Thực đơn dinh dưỡng cá nhân</li>
-                            <li><i data-lucide="check"></i> Video hướng dẫn từng bài tập</li>
-                            <li><i data-lucide="check"></i> Hỗ trợ 24/7 qua điện thoại</li>
-                            <li><i data-lucide="check"></i> Ưu tiên đặt lịch</li>
-                            <li><i data-lucide="check"></i> Tham gia cộng đồng VIP</li>
-                        </ul>
-                        <button class="package-cta" onclick="selectPackage('vip')">Chọn VIP</button>
-                    </div>
+                <div class="section-toolbar">
+                    <h2 style="font-family:'Bebas Neue',letter-spacing:1px">Gói tập</h2>
+                    <button class="btn btn-secondary" id="adminToggleBtn" onclick="toggleAdminMode()"><i data-lucide="settings"></i><span>Quản lý</span></button>
                 </div>
+                
+                <div class="packages-grid" id="packagesGrid"></div>
 
                 <div class="card" style="margin-top:24px">
                     <div class="card-header"><h3>So sánh chi tiết các gói</h3></div>
@@ -662,6 +617,33 @@ canvas{max-width:100%}
     </main>
 </div>
 
+<!-- Package Modal -->
+<div class="modal" id="packageModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header"><h2 id="packageModalTitle">Thêm gói tập</h2><button class="btn btn-icon" onclick="closeModal('packageModal')"><i data-lucide="x"></i></button></div>
+        <form id="packageForm">
+            <div class="modal-body">
+                <input type="hidden" id="packageId">
+                <div class="form-row">
+                    <div class="form-group"><label for="packageName">Tên gói *</label><input type="text" id="packageName" required class="form-control" placeholder="VD: PREMIUM"></div>
+                    <div class="form-group"><label for="packageSessions">Số buổi/tháng *</label><input type="number" id="packageSessions" required min="1" class="form-control" placeholder="VD: 16"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="packagePrice">Giá/tháng (VNĐ) *</label><input type="number" id="packagePrice" required min="0" class="form-control" placeholder="VD: 2000000"></div>
+                    <div class="form-group"><label for="packageColor">Màu sắc</label><input type="color" id="packageColor" value="#f59e0b" class="form-control" style="height:50px;padding:4px"></div>
+                </div>
+                <div class="form-group"><label for="packageFeatured">Nổi bật</label><select id="packageFeatured" class="form-control"><option value="false">Không</option><option value="true">Có</option></select></div>
+                <div class="form-group"><label for="packageFeatures">Tính năng (mỗi dòng 1)</label><textarea id="packageFeatures" class="form-control" rows="5" placeholder="12 buổi tập/tháng&#10;Lịch tập cá nhân hóa&#10;..."></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" onclick="closeModal('packageModal')">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Client Modal -->
 <div class="modal" id="clientModal">
     <div class="modal-backdrop"></div>
@@ -767,6 +749,56 @@ let currentUser = null;
 let unsubscribeClients = null;
 let unsubscribeSessions = null;
 let firebaseInitialized = false;
+let customPackages = [
+    { id: 'basic', name: 'BASIC', price: 1500000, sessions: 12, color: '#71717a', features: ['12 buổi tập/tháng', 'Lịch tập cơ bản', 'Hướng dẫn tư thế', 'Theo dõi tiến độ cơ bản', 'Tư vấn dinh dưỡng cơ bản'] },
+    { id: 'standard', name: 'STANDARD', price: 2800000, sessions: 24, color: '#3b82f6', features: ['24 buổi tập/tháng', 'Lịch tập cá nhân hóa', 'Đo chỉ số hàng tháng', 'Tư vấn dinh dưỡng chi tiết', 'Đánh giá định kỳ', 'Hỗ trợ qua tin nhắn'], featured: true },
+    { id: 'vip', name: 'VIP', price: 5000000, sessions: 48, color: '#f59e0b', features: ['48 buổi tập/tháng', 'Kế hoạch 1-1 hoàn toàn', 'Đo chỉ số 2 lần/tuần', 'Thực đơn cá nhân', 'Video hướng dẫn', 'Hỗ trợ 24/7', 'Ưu tiên đặt lịch', 'Cộng đồng VIP'] }
+];
+
+function loadPackages() {
+    try {
+        const saved = localStorage.getItem('ptPackages');
+        if (saved) {
+            customPackages = JSON.parse(saved);
+        }
+    } catch (e) { }
+}
+
+function savePackages() {
+    localStorage.setItem('ptPackages', JSON.stringify(customPackages));
+    if (isFirebaseReady && currentUser) {
+        firebase.firestore().collection('users').doc(currentUser.uid).collection('settings').doc('packages').set({ packages: customPackages });
+    }
+}
+
+function addPackage(pkg) {
+    pkg.id = 'pkg_' + Date.now();
+    customPackages.push(pkg);
+    savePackages();
+    renderPackages();
+    showToast('Đã thêm gói ' + pkg.name, 'success');
+}
+
+function updatePackage(id, pkg) {
+    const index = customPackages.findIndex(p => p.id === id);
+    if (index !== -1) {
+        customPackages[index] = { ...customPackages[index], ...pkg };
+        savePackages();
+        renderPackages();
+        showToast('Đã cập nhật gói', 'success');
+    }
+}
+
+function deletePackage(id) {
+    if (confirm('Xóa gói này?')) {
+        customPackages = customPackages.filter(p => p.id !== id);
+        savePackages();
+        renderPackages();
+        showToast('Đã xóa gói', 'success');
+    }
+}
+
+loadPackages();
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -1206,6 +1238,7 @@ function initEventListeners() {
     document.getElementById('clientForm').addEventListener('submit', handleClientSubmit);
     document.getElementById('sessionForm').addEventListener('submit', handleSessionSubmit);
     document.getElementById('exerciseForm').addEventListener('submit', handleExerciseSubmit);
+    document.getElementById('packageForm').addEventListener('submit', handlePackageSubmit);
     document.getElementById('clientSearch').addEventListener('input', renderClients);
     document.getElementById('prevMonth').addEventListener('click', () => {
         currentMonth.setMonth(currentMonth.getMonth() - 1);
@@ -1269,7 +1302,7 @@ function navigateTo(section) {
         case 'dashboard': renderDashboard(); break;
         case 'clients': renderClients(); break;
         case 'schedule': renderCalendar(); renderSessionsList(); break;
-        case 'packages': setTimeout(initLucideIcons, 100); break;
+        case 'packages': renderPackages(); break;
         case 'programs': renderExercises(); break;
         case 'measurements': renderMeasurementsSection(); break;
         case 'reports': renderReportsSection(); break;
