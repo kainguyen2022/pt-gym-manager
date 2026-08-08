@@ -800,6 +800,122 @@ function deletePackage(id) {
 
 loadPackages();
 
+let adminMode = false;
+
+function toggleAdminMode() {
+    adminMode = !adminMode;
+    const btn = document.getElementById('adminToggleBtn');
+    if (adminMode) {
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-secondary');
+        btn.innerHTML = '<i data-lucide="x"></i><span>Đóng</span>';
+        showToast('Đang ở chế độ quản lý', 'success');
+    } else {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.innerHTML = '<i data-lucide="settings"></i><span>Quản lý</span>';
+    }
+    renderPackages();
+    lucide.createIcons();
+}
+
+function renderPackages() {
+    const grid = document.getElementById('packagesGrid');
+    const clientPackage = document.getElementById('clientPackage');
+    
+    if (clientPackage) {
+        clientPackage.innerHTML = '<option value="">Chọn gói</option>';
+        customPackages.forEach(pkg => {
+            const price = (pkg.price / 1000000).toFixed(1) + 'M';
+            clientPackage.innerHTML += '<option value="' + pkg.id + '">' + pkg.name + ' - ' + price + ' - ' + pkg.sessions + ' buổi</option>';
+        });
+    }
+    
+    grid.innerHTML = customPackages.map(pkg => {
+        const priceDisplay = pkg.price >= 1000000 ? (pkg.price / 1000000).toFixed(1) + 'M' : pkg.price.toLocaleString();
+        const adminActions = adminMode ? '<div class="package-admin-actions"><button class="package-admin-btn edit" onclick="event.stopPropagation();openPackageModal(\'' + pkg.id + '\')"><i data-lucide="edit-2" style="width:16px;height:16px"></i></button><button class="package-admin-btn delete" onclick="event.stopPropagation();deletePackage(\'' + pkg.id + '\')"><i data-lucide="trash-2" style="width:16px;height:16px"></i></button></div>' : '';
+        
+        return '<div class="package-card' + (pkg.featured ? ' featured' : '') + (adminMode ? ' admin-mode' : '') + '">' +
+            adminActions +
+            '<div class="package-header">' +
+                '<div class="package-header-left">' +
+                    '<div class="package-name" style="color:' + pkg.color + '">' + pkg.name + '</div>' +
+                    '<div class="package-sessions">' + pkg.sessions + ' buổi/tháng</div>' +
+                '</div>' +
+                '<div class="package-price"><span class="amount" style="color:' + pkg.color + '">' + priceDisplay + '</span><span class="period">/tháng</span></div>' +
+            '</div>' +
+            '<ul class="package-features">' +
+                pkg.features.map(f => '<li><i data-lucide="check"></i> ' + f + '</li>').join('') +
+            '</ul>' +
+            '<button class="package-cta" onclick="selectPackage(\'' + pkg.id + '\')" style="border-color:' + pkg.color + ';color:' + pkg.color + '">Chọn ' + pkg.name + '</button>' +
+        '</div>';
+    }).join('');
+    
+    if (adminMode) {
+        grid.innerHTML += '<div class="package-card" style="border-style:dashed;border-color:var(--accent-primary);display:flex;align-items:center;justify-content:center;min-height:200px;cursor:pointer" onclick="openPackageModal()">' +
+            '<div style="text-align:center"><i data-lucide="plus-circle" style="width:48px;height:48px;color:var(--accent-primary)"></i><div style="color:var(--accent-primary);margin-top:8px;font-weight:600">Thêm gói mới</div></div>' +
+        '</div>';
+    }
+    
+    lucide.createIcons();
+}
+
+function openPackageModal(pkgId) {
+    const form = document.getElementById('packageForm');
+    form.reset();
+    
+    if (pkgId) {
+        const pkg = customPackages.find(p => p.id === pkgId);
+        if (pkg) {
+            document.getElementById('packageModalTitle').textContent = 'Sửa gói';
+            document.getElementById('packageId').value = pkg.id;
+            document.getElementById('packageName').value = pkg.name;
+            document.getElementById('packageSessions').value = pkg.sessions;
+            document.getElementById('packagePrice').value = pkg.price;
+            document.getElementById('packageColor').value = pkg.color || '#f59e0b';
+            document.getElementById('packageFeatured').value = pkg.featured ? 'true' : 'false';
+            document.getElementById('packageFeatures').value = pkg.features.join('\n');
+        }
+    } else {
+        document.getElementById('packageModalTitle').textContent = 'Thêm gói tập';
+        document.getElementById('packageId').value = '';
+        document.getElementById('packageColor').value = '#f59e0b';
+    }
+    
+    openModal('packageModal');
+}
+
+function handlePackageSubmit(e) {
+    e.preventDefault();
+    const pkgId = document.getElementById('packageId').value;
+    const featuresText = document.getElementById('packageFeatures').value;
+    const features = featuresText.split('\n').map(f => f.trim()).filter(f => f);
+    
+    const pkg = {
+        name: document.getElementById('packageName').value.trim().toUpperCase(),
+        sessions: parseInt(document.getElementById('packageSessions').value),
+        price: parseInt(document.getElementById('packagePrice').value),
+        color: document.getElementById('packageColor').value,
+        featured: document.getElementById('packageFeatured').value === 'true',
+        features: features
+    };
+    
+    if (pkgId) {
+        updatePackage(pkgId, pkg);
+    } else {
+        addPackage(pkg);
+    }
+    
+    closeModal('packageModal');
+}
+
+function selectPackage(pkgId) {
+    document.getElementById('clientPackage').value = pkgId;
+    navigateTo('clients');
+    showToast('Đã chọn gói. Thêm khách hàng mới.', 'success');
+    setTimeout(() => openClientModal(), 500);
+}
+
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDmJQIPgYsM1hw8gIeYXgsEwCbzc4NVLRo",
