@@ -322,6 +322,29 @@ canvas{max-width:100%}
 .exercise-actions .play-btn{background:var(--danger);color:white}
 .exercise-actions .edit-btn{background:var(--accent-primary);color:var(--bg-primary)}
 
+
+.exercises-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.view-toggle{display:flex;gap:4px;background:var(--bg-secondary);padding:4px;border-radius:var(--radius-md)}
+.view-toggle button{padding:8px 12px;border:none;background:transparent;color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;font-size:13px}
+.view-toggle button.active{background:var(--accent-primary);color:var(--bg-primary)}
+.view-toggle button:hover:not(.active){color:var(--text-primary)}
+/* List View */
+.exercises-list{display:flex;flex-direction:column;gap:8px}
+.exercise-list-item{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;cursor:pointer;transition:all 0.2s}
+.exercise-list-item:hover{border-color:var(--accent-primary);transform:translateX(4px)}
+.exercise-list-item .thumb{width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;background:var(--bg-secondary)}
+.exercise-list-item .thumb-placeholder{width:60px;height:60px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center}
+.exercise-list-item .info{flex:1}
+.exercise-list-item .name{font-weight:600;margin-bottom:4px}
+.exercise-list-item .meta{font-size:12px;color:var(--text-muted);display:flex;gap:12px}
+.exercise-list-item .play-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--danger);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Category View */
+.exercises-by-category{margin-bottom:24px}
+.category-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.category-header h3{font-size:16px;font-weight:600;color:var(--accent-primary)}
+.category-header span{background:var(--accent-primary);color:var(--bg-primary);padding:2px 8px;border-radius:10px;font-size:11px}
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+
 </style>
 </head>
 <body>
@@ -485,7 +508,15 @@ canvas{max-width:100%}
                     <button class="btn btn-primary" onclick="openExerciseModal()"><i data-lucide="plus"></i><span>Thêm</span></button>
                 </div>
                 <div class="tab-content active" id="exercisesTab">
-                    <div class="exercises-grid" id="exercisesGrid"><div class="empty-state"><i data-lucide="dumbbell"></i><p>Chưa có bài tập nào</p></div></div>
+                    <div class="exercises-toolbar">
+                        <div class="view-toggle">
+                            <button class="active" onclick="setExercisesView('grid')" title="Lưới"><i data-lucide="grid-3x3"></i></button>
+                            <button onclick="setExercisesView('list')" title="Danh sách"><i data-lucide="list"></i></button>
+                            <button onclick="setExercisesView('category')" title="Theo nhóm"><i data-lucide="folder"></i></button>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openExerciseLibrary()" style="margin-left:auto"><i data-lucide="plus"></i> Thêm</button>
+                    </div>
+                    <div id="exercisesContainer"><div class="empty-state"><i data-lucide="dumbbell"></i><p>Chưa có bài tập nào</p></div></div>
                 </div>
                 <div class="tab-content" id="programsTab">
                     <div class="programs-list" id="programsList"><div class="empty-state"><i data-lucide="clipboard-list"></i><p>Chưa có kế hoạch tập nào</p></div></div>
@@ -1424,6 +1455,7 @@ const exerciseLibrary = [
 ];
 
 let currentSection = 'dashboard';
+let exercisesView = localStorage.getItem('exercisesView') || 'grid';
 let currentMonth = new Date();
 let selectedDate = null;
 let editingClientId = null;
@@ -1796,23 +1828,84 @@ function deleteSessionById(id) {
 }
 
 function renderExercises() {
-    const container = document.getElementById('exercisesGrid');
+    const container = document.getElementById('exercisesContainer') || document.getElementById('exercisesGrid');
     const exercises = getExercises();
     const catNames = { chest: 'Ngực', back: 'Lưng', shoulders: 'Vai', arms: 'Tay', legs: 'Chân', core: 'Bụng', cardio: 'Cardio' };
+    
+    // Update toggle buttons
+    document.querySelectorAll('.view-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(exercisesView));
+    });
+    
     if (exercises.length === 0) {
         container.innerHTML = '<div class="empty-state"><i data-lucide="dumbbell"></i><p>Chưa có bài tập nào</p><button class="btn btn-secondary" onclick="openExerciseLibrary()"><i data-lucide="library"></i> Thư viện bài tập</button></div>';
         initLucideIcons();
         return;
     }
-    container.innerHTML = exercises.map(ex => {
+    
+    if (exercisesView === 'list') {
+        renderExercisesList(exercises, catNames, container);
+    } else if (exercisesView === 'category') {
+        renderExercisesByCategory(exercises, catNames, container);
+    } else {
+        renderExercisesGrid(exercises, catNames, container);
+    }
+    initLucideIcons();
+}
+
+function renderExercisesGrid(exercises, catNames, container) {
+    container.innerHTML = '<div class="exercises-grid" id="exercisesGrid"></div>';
+    const grid = document.getElementById('exercisesGrid');
+    grid.innerHTML = exercises.map(ex => {
         const hasMedia = ex.videoUrl || ex.imageUrl;
         const mediaHtml = ex.videoUrl 
             ? '<div style="position:relative;margin:-16px -16px 12px -16px"><img style="width:100%;height:120px;object-fit:cover" src="' + (ex.imageUrl || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400') + '" alt="' + ex.name + '"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(239,68,68,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>'
             : (ex.imageUrl ? '<img style="width:100%;height:120px;object-fit:cover;margin:-16px -16px 12px -16px;border-radius:12px 12px 0 0" src="' + ex.imageUrl + '" alt="' + ex.name + '">' : '');
-        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><i data-lucide="play"></i> Video</button>' : '';
-        return '<div class="exercise-card' + (hasMedia ? ' has-media' : '') + '" id="ex-' + ex.id + '">' + mediaHtml + '<div class="exercise-header"><div class="exercise-icon"><i data-lucide="dumbbell"></i></div><span class="exercise-category">' + (catNames[ex.category] || ex.category) + '</span></div><div class="exercise-name">' + ex.name + '</div><div class="exercise-meta"><span><i data-lucide="layers"></i> ' + ex.sets + ' sets</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div><div class="exercise-actions">' + playBtn + '<button class="edit-btn" onclick="openExerciseModal(\'' + ex.id + '\')"><i data-lucide="edit-2"></i> Sửa</button></div></div>';
+        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><i data-lucide="play"></i></button>' : '';
+        return '<div class="exercise-card' + (hasMedia ? ' has-media' : '') + '">' + mediaHtml + '<div class="exercise-header"><div class="exercise-icon"><i data-lucide="dumbbell"></i></div><span class="exercise-category">' + (catNames[ex.category] || ex.category) + '</span></div><div class="exercise-name">' + ex.name + '</div><div class="exercise-meta"><span><i data-lucide="layers"></i> ' + ex.sets + '</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div><div class="exercise-actions" style="gap:4px;margin-top:10px">' + playBtn + '<button class="edit-btn" style="flex:1" onclick="openExerciseModal(\'' + ex.id + '\')"><i data-lucide="edit-2"></i></button></div></div>';
     }).join('');
-    initLucideIcons();
+}
+
+function renderExercisesList(exercises, catNames, container) {
+    container.innerHTML = '<div class="exercises-list" id="exercisesList"></div>';
+    const list = document.getElementById('exercisesList');
+    list.innerHTML = exercises.map(ex => {
+        const thumb = ex.imageUrl 
+            ? '<img class="thumb" src="' + ex.imageUrl + '" alt="' + ex.name + '">'
+            : '<div class="thumb-placeholder"><i data-lucide="dumbbell"></i></div>';
+        const playBtn = ex.videoUrl ? '<button class="play-btn" onclick="openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><i data-lucide="play"></i></button>' : '';
+        return '<div class="exercise-list-item" onclick="openExerciseModal(\'' + ex.id + '\')">' + thumb + '<div class="info"><div class="name">' + ex.name + '</div><div class="meta"><span class="exercise-category" style="padding:2px 6px;font-size:10px">' + (catNames[ex.category] || ex.category) + '</span><span><i data-lucide="layers"></i> ' + ex.sets + ' sets</span><span><i data-lucide="repeat"></i> ' + ex.reps + '</span></div></div>' + playBtn + '</div>';
+    }).join('');
+}
+
+function renderExercisesByCategory(exercises, catNames, container) {
+    const categories = {};
+    exercises.forEach(ex => {
+        const cat = ex.category || 'other';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(ex);
+    });
+    
+    container.innerHTML = '<div class="exercises-by-category"></div>';
+    const wrapper = container.querySelector('.exercises-by-category');
+    
+    Object.keys(categories).forEach(cat => {
+        const catExercises = categories[cat];
+        const catHtml = '<div class="category-section" style="margin-bottom:24px"><div class="category-header"><h3>' + (catNames[cat] || cat) + '</h3><span>' + catExercises.length + ' bài</span></div><div class="category-grid" id="cat-' + cat + '"></div></div>';
+        wrapper.innerHTML += catHtml;
+        const catGrid = document.getElementById('cat-' + cat);
+        catGrid.innerHTML = catExercises.map(ex => {
+            const thumb = ex.imageUrl ? '<img style="width:100%;height:100px;object-fit:cover;border-radius:8px 8px 0 0" src="' + ex.imageUrl + '" alt="' + ex.name + '">' : '';
+            const playBtn = ex.videoUrl ? '<button style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:rgba(239,68,68,0.9);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="event.stopPropagation();openVideoModal(\'' + ex.videoUrl + '\', \'' + ex.name.replace(/'/g, "\'") + '\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></button>' : '';
+            return '<div class="exercise-card" style="position:relative;padding:0;overflow:hidden" onclick="openExerciseModal(\'' + ex.id + '\')">' + (thumb || '<div style="height:100px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center"><i data-lucide="dumbbell" style="color:white"></i></div>') + playBtn + '<div style="padding:12px"><div style="font-weight:600;font-size:13px;margin-bottom:4px">' + ex.name + '</div><div style="font-size:11px;color:var(--text-muted)">' + ex.sets + ' sets × ' + ex.reps + '</div></div></div>';
+        }).join('');
+    });
+}
+
+function setExercisesView(view) {
+    exercisesView = view;
+    localStorage.setItem('exercisesView', view);
+    renderExercises();
 }
 
 // Video modal functions
