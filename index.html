@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
 :root{--bg-primary:#0f0f14;--bg-secondary:#1a1a24;--bg-card:#22222e;--bg-hover:#2a2a38;--accent-primary:#f59e0b;--accent-secondary:#fb923c;--accent-glow:rgba(245,158,11,0.2);--text-primary:#f4f4f5;--text-secondary:#a1a1aa;--text-muted:#71717a;--success:#22c55e;--warning:#eab308;--danger:#ef4444;--border:#27272a;--sidebar-width:260px;--header-height:60px;--bottom-nav-height:64px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:12px;--shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 6px rgba(0,0,0,0.4);--shadow-lg:0 10px 25px rgba(0,0,0,0.5);--shadow-glow:0 0 20px var(--accent-glow)}
+[data-theme="light"]{--bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-card:#ffffff;--bg-hover:#f1f5f9;--accent-primary:#f59e0b;--accent-secondary:#fb923c;--accent-glow:rgba(245,158,11,0.15);--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--success:#22c55e;--warning:#eab308;--danger:#ef4444;--border:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 25px rgba(0,0,0,0.1)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.5;font-size:15px;min-height:100vh;min-height:100dvh;overflow-x:hidden}
@@ -395,6 +396,7 @@ canvas{max-width:100%}
             <button class="menu-toggle" id="menuToggle"><i data-lucide="menu"></i></button>
             <div class="header-title"><h1 id="pageTitle">Dashboard</h1></div>
             <div class="header-actions">
+                <button class="btn btn-icon" id="themeToggle" title="Chuyển chế độ sáng/tối"><i data-lucide="moon"></i></button>
                 <button class="btn btn-secondary" id="authBtn"><i data-lucide="log-in"></i><span>Đăng nhập</span></button>
                 <button class="btn btn-primary" id="addClientBtn"><i data-lucide="user-plus"></i><span>Thêm khách</span></button>
             </div>
@@ -1546,6 +1548,7 @@ let measurementsChart = null;
 let macroChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
     initDB();
     initLucideIcons();
     initEventListeners();
@@ -1570,6 +1573,7 @@ function initEventListeners() {
     document.getElementById('menuToggle').addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('open');
     });
+    document.getElementById('themeToggle').addEventListener('click', () => toggleTheme());
     document.getElementById('addClientBtn').addEventListener('click', () => openClientModal());
     document.getElementById('fabBtn').addEventListener('click', () => openClientModal());
     document.getElementById('clientForm').addEventListener('submit', handleClientSubmit);
@@ -2403,6 +2407,29 @@ function refreshAllViews() {
     renderMeasurementsSection();
     renderReportsSection();
     renderRemindersSection();
+}
+
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') !== 'light';
+    html.setAttribute('data-theme', isDark ? 'light' : '');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    const icon = document.querySelector('#themeToggle i');
+    if (icon) {
+        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        initLucideIcons();
+    }
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    const icon = document.querySelector('#themeToggle i');
+    if (icon && saved === 'light') {
+        icon.setAttribute('data-lucide', 'sun');
+    }
 }
 
 function showToast(msg, type) {
