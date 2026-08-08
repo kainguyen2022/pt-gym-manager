@@ -320,6 +320,8 @@ canvas{max-width:100%}
 .login-overlay.hidden { display: none; }
 .login-overlay h2 { font-size: 24px; margin-bottom: 8px; color: var(--text-primary); }
 .login-overlay p { color: var(--text-muted); margin-bottom: 24px; }
+.guest-mode-btn{margin-top:12px}
+.guest-mode-note{margin-top:10px;font-size:12px;color:var(--text-muted)}
 
 
 .exercise-card.has-media{border-color:var(--accent-primary);overflow:hidden}
@@ -364,6 +366,8 @@ canvas{max-width:100%}
     <h2>Vui lòng đăng nhập</h2>
     <p>Đăng nhập để xem và quản lý dữ liệu của bạn</p>
     <button class="btn btn-primary" onclick="signInWithGoogle()"><i data-lucide="log-in"></i> Đăng nhập với Google</button>
+    <button class="btn btn-secondary guest-mode-btn" id="guestModeBtn" onclick="enterGuestMode()"><i data-lucide="play"></i> Bỏ qua đăng nhập (chế độ thử)</button>
+    <div class="guest-mode-note">Dữ liệu thử chỉ lưu trên trình duyệt này</div>
 </div>
 
 <div class="app">
@@ -711,6 +715,7 @@ canvas{max-width:100%}
                 <button class="bottom-nav-item" data-section="schedule"><i data-lucide="calendar"></i><span>Lịch</span></button>
                 <button class="bottom-nav-item" data-section="nutrition"><i data-lucide="utensils"></i><span>Ăn uống</span></button>
                 <button class="bottom-nav-item" data-section="packages"><i data-lucide="package"></i><span>Gói</span></button>
+                <button class="bottom-nav-item" data-section="programs"><i data-lucide="dumbbell"></i><span>Bài tập</span></button>
                 <button class="bottom-nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Báo cáo</span></button>
                 <button class="bottom-nav-item" data-section="notifications"><i data-lucide="bell"></i><span>Nhắc nhở</span></button>
             </div>
@@ -846,7 +851,15 @@ canvas{max-width:100%}
 
 <script>
 const DB_PREFIX = 'ptGymManager';
-function getDBName() { return DB_PREFIX + (currentUser ? '_' + currentUser.uid : ''); }
+const GUEST_MODE_KEY = DB_PREFIX + '_guestMode';
+function isPreviewEnvironment() {
+    const hostname = window.location.hostname;
+    return window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.vercel.app');
+}
+function isGuestModeEnabled() {
+    return isPreviewEnvironment() && localStorage.getItem(GUEST_MODE_KEY) === 'true';
+}
+function getDBName() { return DB_PREFIX + (currentUser ? '_' + currentUser.uid : (isGuestModeEnabled() ? '_demo' : '')); }
 let dataCache = null;
 let isFirebaseReady = false;
 let currentUser = null;
@@ -1320,13 +1333,21 @@ function updateAuthUI(user) {
     const userNameEl = document.querySelector('.user-name');
     const userRoleEl = document.querySelector('.user-role');
     const authBtn = document.getElementById('authBtn');
+    const guestMode = !user && isGuestModeEnabled();
     
     if (user) {
+        localStorage.removeItem(GUEST_MODE_KEY);
         userNameEl.textContent = user.displayName || 'User';
         userRoleEl.textContent = user.email;
         authBtn.innerHTML = '<i data-lucide="log-out"></i><span>Đăng xuất</span>';
         authBtn.onclick = signOut;
         isFirebaseReady = true;
+    } else if (guestMode) {
+        userNameEl.textContent = 'Chế độ thử';
+        userRoleEl.textContent = 'Dữ liệu chỉ lưu trên trình duyệt';
+        authBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
+        authBtn.onclick = signInWithGoogle;
+        isFirebaseReady = false;
     } else {
         userNameEl.textContent = 'Vui lòng đăng nhập';
         userRoleEl.textContent = 'Để xem dữ liệu của bạn';
@@ -1334,11 +1355,11 @@ function updateAuthUI(user) {
         authBtn.onclick = signInWithGoogle;
         isFirebaseReady = false;
     }
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         
         // Show/hide login overlay
         const overlay = document.getElementById('loginOverlay');
-        if (user) {
+        if (user || guestMode) {
             overlay.classList.add('hidden');
         } else {
             overlay.classList.remove('hidden');
@@ -1403,6 +1424,11 @@ function loadFromFirestore() {
 function loadFromLocalStorage() {
     // Clear ALL ptGymManager keys when logging out
     dataCache = null;
+    if (isGuestModeEnabled()) {
+        initDB();
+        refreshAllViews();
+        return;
+    }
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -1812,9 +1838,26 @@ let weightChart = null;
 let measurementsChart = null;
 let macroChart = null;
 
+function initGuestMode() {
+    const guestModeBtn = document.getElementById('guestModeBtn');
+    if (guestModeBtn) guestModeBtn.hidden = !isPreviewEnvironment();
+    if (isGuestModeEnabled()) updateAuthUI(null);
+}
+
+function enterGuestMode() {
+    if (!isPreviewEnvironment()) return;
+    localStorage.setItem(GUEST_MODE_KEY, 'true');
+    currentUser = null;
+    isFirebaseReady = false;
+    loadFromLocalStorage();
+    updateAuthUI(null);
+    showToast('Đã vào chế độ thử. Dữ liệu chỉ lưu trên trình duyệt.', 'success');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     initDB();
+    initGuestMode();
     initLucideIcons();
     initEventListeners();
     populateClientDropdowns();
@@ -2739,6 +2782,7 @@ window.calculateNutrition = calculateNutrition;
 window.exportReport = exportReport;
 window.sendSingleReminder = sendSingleReminder;
 window.sendAllReminders = sendAllReminders;
+window.enterGuestMode = enterGuestMode;
 
 // Stub functions for Firebase auth (will be replaced when Firebase loads)
 window.signInWithGoogle = function() {
