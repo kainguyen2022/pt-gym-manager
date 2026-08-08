@@ -639,6 +639,7 @@ canvas{max-width:100%}
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" onclick="closeModal('clientModal')">Hủy</button>
+                <button class="btn btn-secondary" type="button" onclick="openNutritionFromClient()"><i data-lucide="utensils"></i>Thực đơn</button>
                 <button class="btn btn-primary" type="submit">Lưu</button>
             </div>
         </form>
@@ -1840,6 +1841,16 @@ function showToast(msg, type) {
 
 
 function selectPackage(packageType) { document.getElementById('clientPackage').value = packageType; navigateTo('clients'); showToast('Đã chọn gói ' + packageType.toUpperCase() + '. Thêm khách hàng mới.', 'success'); setTimeout(() => openClientModal(), 500); }
+function openNutritionFromClient() {
+    const height = document.getElementById('clientHeight').value;
+    const age = document.getElementById('clientAge').value;
+    if (height) document.getElementById('nutritionHeight').value = height;
+    if (age) document.getElementById('nutritionAge').value = age;
+    closeModal('clientModal');
+    navigateTo('nutrition');
+    setTimeout(() => calculateNutrition(), 300);
+}
+
 window.navigateTo = navigateTo;
 window.openClientModal = openClientModal;
 window.openClientDetail = openClientDetail;
