@@ -1042,7 +1042,7 @@ function selectPackage(pkgId) {
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAZAIBSanO9Iq3fdWAh2LMvDvfIx1zD4U0",
-    authDomain: "pt-manager-2b7c5.firebaseapp.com",
+    authDomain: "pt-gym-kappa.vercel.app",
     projectId: "pt-manager-2b7c5",
     storageBucket: "pt-manager-2b7c5.firebasestorage.app",
     messagingSenderId: "968416571201",
@@ -1080,7 +1080,11 @@ function initFirebase() {
     });
 
     // Complete a Google sign-in started with signInWithRedirect().
-    auth.getRedirectResult().catch(handleAuthError);
+    auth.getRedirectResult()
+        .then((result) => {
+            if (result?.user) updateAuthUI(result.user);
+        })
+        .catch(handleAuthError);
 
     // Initialize FCM
     initFCM();
@@ -1350,6 +1354,12 @@ window.signInWithGoogle = function() {
         });
     };
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch((error) => {
+            // Some mobile browsers reject local persistence. Continue with
+            // session persistence instead of aborting the sign-in flow.
+            console.warn('Local auth persistence unavailable:', error);
+            return auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(() => undefined);
+        })
         .then(startSignIn)
         .catch(handleAuthError);
 };
@@ -2828,27 +2838,34 @@ window.sendSingleReminder = sendSingleReminder;
 window.sendAllReminders = sendAllReminders;
 window.enterGuestMode = enterGuestMode;
 
-// Load Firebase SDK via script tags
+// Load the remaining Firebase SDK modules. firebase-app and firebase-messaging
+// are loaded in <head>; keep every Firebase module on the same version.
 (function loadFirebaseSDK() {
-    // Firebase App
-    var appScript = document.createElement('script');
-    appScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
-    appScript.onload = loadFirestore;
-    document.body.appendChild(appScript);
-    
+    var firebaseVersion = '10.7.1';
+
     function loadFirestore() {
         var firestoreScript = document.createElement('script');
-        firestoreScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+        firestoreScript.src = 'https://www.gstatic.com/firebasejs/' + firebaseVersion + '/firebase-firestore-compat.js';
         firestoreScript.onload = loadAuth;
         document.body.appendChild(firestoreScript);
     }
     
     function loadAuth() {
         var authScript = document.createElement('script');
-        authScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+        authScript.src = 'https://www.gstatic.com/firebasejs/' + firebaseVersion + '/firebase-auth-compat.js';
         authScript.onload = initFirebase;
         document.body.appendChild(authScript);
     }
+
+    if (typeof firebase !== 'undefined' && typeof firebase.initializeApp === 'function') {
+        loadFirestore();
+        return;
+    }
+
+    var appScript = document.createElement('script');
+    appScript.src = 'https://www.gstatic.com/firebasejs/' + firebaseVersion + '/firebase-app-compat.js';
+    appScript.onload = loadFirestore;
+    document.body.appendChild(appScript);
 })();
 </script>
 </body>
