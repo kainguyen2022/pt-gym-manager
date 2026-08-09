@@ -10,34 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    // Keep Firebase Auth API calls on the app origin. Some embedded/mobile
-    // browsers block the cross-origin POST made after the Google callback.
-    (function proxyFirebaseAuthRequests() {
-        var originalFetch = window.fetch.bind(window);
-        var authProxies = [
-            ['https://identitytoolkit.googleapis.com/', '/__/identitytoolkit/'],
-            ['https://securetoken.googleapis.com/', '/__/securetoken/']
-        ];
-
-        window.fetch = function(input, init) {
-            var requestUrl = typeof input === 'string'
-                ? input
-                : (input instanceof URL ? input.toString() : input?.url);
-            var proxy = authProxies.find(function(entry) {
-                return requestUrl && requestUrl.startsWith(entry[0]);
-            });
-
-            if (!proxy) return originalFetch(input, init);
-
-            var proxyUrl = proxy[1] + requestUrl.slice(proxy[0].length);
-            if (typeof Request !== 'undefined' && input instanceof Request) {
-                return originalFetch(new Request(proxyUrl, input), init);
-            }
-            return originalFetch(proxyUrl, init);
-        };
-    })();
-    </script>
+    <script src="/firebase-auth-fetch-proxy.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging-compat.js"></script>
     <style>

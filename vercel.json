@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/__/auth/handler",
+      "destination": "/auth-handler.html"
+    },
+    {
       "source": "/__/auth/:path*",
       "destination": "https://pt-manager-2b7c5.firebaseapp.com/__/auth/:path*"
     },
