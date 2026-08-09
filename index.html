@@ -34,18 +34,31 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .nav-item:hover{background:var(--bg-hover);color:var(--text-primary)}
 .nav-item.active{background:var(--bg-card);color:var(--accent-primary);border-left-color:var(--accent-primary)}
 .nav-item i{width:20px;height:20px}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.app-version{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text-muted);font-size:11px}
+.app-version-label{font-weight:600}
+.app-version-number{padding:3px 7px;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;color:var(--text-secondary);font-size:10px;font-weight:600}
 .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))}
 .header{height:var(--header-height);background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
 .menu-toggle{display:none;background:transparent;border:none;color:var(--text-primary);cursor:pointer;padding:8px}
 .header-title{flex:1}
 .header-title h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
 .header-actions{display:flex;gap:8px}
-.header-profile{display:flex;align-items:center;gap:8px;min-width:0;padding:4px 10px 4px 5px;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;flex-shrink:0}
+.header-profile-wrap{position:relative;flex-shrink:0}
+.header-profile{display:flex;align-items:center;gap:8px;min-width:0;padding:4px 10px 4px 5px;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;color:var(--text-primary);cursor:pointer;flex-shrink:0}
+.header-profile:hover{background:var(--bg-hover)}
+.header-profile:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}
 .header-profile-avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--bg-primary);flex-shrink:0}
 .header-profile-copy{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.2}
 .header-profile-name,.header-profile-role{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
 .header-profile-name{font-size:12px;font-weight:700}
 .header-profile-role{font-size:10px;color:var(--text-muted)}
+.header-profile-chevron{width:14px;height:14px;color:var(--text-muted);flex-shrink:0}
+.profile-menu{display:none;position:absolute;top:calc(100% + 8px);right:0;width:220px;padding:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:70}
+.profile-menu.open{display:block}
+.profile-menu-action{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;background:transparent;border:none;border-radius:var(--radius-md);color:var(--text-primary);font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer}
+.profile-menu-action:hover{background:var(--bg-hover)}
+.profile-menu-action i{width:18px;height:18px;color:var(--accent-primary)}
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-secondary);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom, 0px)}
 .bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;width:100%;height:100%;margin:0}
 .bottom-nav-item{display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:transparent;border:none;color:var(--text-muted);font-size:10px;font-weight:500;cursor:pointer;border-radius:var(--radius-md);min-width:0}
@@ -260,6 +273,7 @@ canvas{max-width:100%}
     .header{padding:0 12px}
     .header-profile{padding:4px;border-radius:50%;background:transparent;border-color:transparent}
     .header-profile-copy{display:none}
+    .header-profile-chevron{display:none}
     .header-profile-avatar{width:36px;height:36px;font-size:13px}
     .modal-content::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(--text-muted);border-radius:2px;opacity:0.5}
     .btn{min-height:44px}
@@ -404,6 +418,12 @@ canvas{max-width:100%}
             <button class="nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Báo cáo</span></button>
             <button class="nav-item" data-section="notifications"><i data-lucide="bell"></i><span>Nhắc nhở</span></button>
         </nav>
+        <div class="sidebar-footer">
+            <div class="app-version" title="Phiên bản ứng dụng">
+                <span class="app-version-label">PT Manager</span>
+                <span class="app-version-number">v1.0.0</span>
+            </div>
+        </div>
     </aside>
 
     <main class="main-content">
@@ -412,13 +432,18 @@ canvas{max-width:100%}
             <div class="header-title"><h1 id="pageTitle">Dashboard</h1></div>
             <div class="header-actions">
                 <button class="btn btn-icon" id="themeToggle" title="Chuyển chế độ sáng/tối"><i data-lucide="moon"></i></button>
-                <button class="btn btn-secondary" id="authBtn"><i data-lucide="log-in"></i><span>Đăng nhập</span></button>
                 <button class="btn btn-primary" id="addClientBtn"><i data-lucide="user-plus"></i><span>Thêm khách</span></button>
-                <div class="header-profile" id="headerProfile" aria-label="Hồ sơ người dùng" title="Hồ sơ người dùng">
-                    <div class="header-profile-avatar">PT</div>
-                    <div class="header-profile-copy">
-                        <div class="header-profile-name">Vui lòng đăng nhập</div>
-                        <div class="header-profile-role">Để xem dữ liệu của bạn</div>
+                <div class="header-profile-wrap">
+                    <button class="header-profile" id="headerProfile" type="button" aria-label="Hồ sơ người dùng" aria-expanded="false" aria-controls="profileMenu">
+                        <span class="header-profile-avatar">PT</span>
+                        <span class="header-profile-copy">
+                            <span class="header-profile-name">Vui lòng đăng nhập</span>
+                            <span class="header-profile-role">Để xem dữ liệu của bạn</span>
+                        </span>
+                        <i data-lucide="chevron-down" class="header-profile-chevron" aria-hidden="true"></i>
+                    </button>
+                    <div class="profile-menu" id="profileMenu">
+                        <button class="profile-menu-action" id="profileAuthBtn" type="button"><i data-lucide="log-in"></i><span>Đăng nhập</span></button>
                     </div>
                 </div>
             </div>
@@ -1370,7 +1395,7 @@ function updateAuthUI(user) {
     const userNameEls = document.querySelectorAll('.header-profile-name');
     const userRoleEls = document.querySelectorAll('.header-profile-role');
     const userAvatarEls = document.querySelectorAll('.header-profile-avatar');
-    const authBtn = document.getElementById('authBtn');
+    const profileAuthBtn = document.getElementById('profileAuthBtn');
     const guestMode = !user && isGuestModeEnabled();
     const updateProfile = (name, role, initials) => {
         userNameEls.forEach(el => el.textContent = name);
@@ -1382,18 +1407,27 @@ function updateAuthUI(user) {
         localStorage.removeItem(GUEST_MODE_KEY);
         const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
         updateProfile(displayName, user.email || 'Tài khoản Google', getInitials(displayName));
-        authBtn.innerHTML = '<i data-lucide="log-out"></i><span>Đăng xuất</span>';
-        authBtn.onclick = signOut;
+        profileAuthBtn.innerHTML = '<i data-lucide="log-out"></i><span>Đăng xuất</span>';
+        profileAuthBtn.onclick = () => {
+            setProfileMenuOpen(false);
+            signOut();
+        };
         isFirebaseReady = true;
     } else if (guestMode) {
         updateProfile('Chế độ thử', 'Dữ liệu chỉ lưu trên trình duyệt', 'PT');
-        authBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
-        authBtn.onclick = signInWithGoogle;
+        profileAuthBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
+        profileAuthBtn.onclick = () => {
+            setProfileMenuOpen(false);
+            signInWithGoogle();
+        };
         isFirebaseReady = false;
     } else {
         updateProfile('Vui lòng đăng nhập', 'Để xem dữ liệu của bạn', 'PT');
-        authBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
-        authBtn.onclick = signInWithGoogle;
+        profileAuthBtn.innerHTML = '<i data-lucide="log-in"></i><span>Đăng nhập</span>';
+        profileAuthBtn.onclick = () => {
+            setProfileMenuOpen(false);
+            signInWithGoogle();
+        };
         isFirebaseReady = false;
     }
         if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1902,6 +1936,14 @@ function enterGuestMode() {
     showToast('Đã vào chế độ thử. Dữ liệu chỉ lưu trên trình duyệt.', 'success');
 }
 
+function setProfileMenuOpen(isOpen) {
+    const profileMenu = document.getElementById('profileMenu');
+    const headerProfile = document.getElementById('headerProfile');
+    if (!profileMenu || !headerProfile) return;
+    profileMenu.classList.toggle('open', isOpen);
+    headerProfile.setAttribute('aria-expanded', String(isOpen));
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     initDB();
@@ -1930,6 +1972,19 @@ function initEventListeners() {
         document.getElementById('sidebar').classList.toggle('open');
     });
     document.getElementById('themeToggle').addEventListener('click', () => toggleTheme());
+    const headerProfile = document.getElementById('headerProfile');
+    const profileMenu = document.getElementById('profileMenu');
+    if (headerProfile && profileMenu) {
+        headerProfile.addEventListener('click', event => {
+            event.stopPropagation();
+            setProfileMenuOpen(!profileMenu.classList.contains('open'));
+        });
+        profileMenu.addEventListener('click', event => event.stopPropagation());
+        document.addEventListener('click', () => setProfileMenuOpen(false));
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') setProfileMenuOpen(false);
+        });
+    }
     document.getElementById('addClientBtn').addEventListener('click', () => openClientModal());
     document.getElementById('fabBtn').addEventListener('click', () => openClientModal());
     document.getElementById('clientForm').addEventListener('submit', handleClientSubmit);
