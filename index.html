@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging-compat.js"></script>
     <style>
 :root{--bg-primary:#0f0f14;--bg-secondary:#1a1a24;--bg-card:#22222e;--bg-hover:#2a2a38;--accent-primary:#f59e0b;--accent-secondary:#fb923c;--accent-glow:rgba(245,158,11,0.2);--text-primary:#f4f4f5;--text-secondary:#a1a1aa;--text-muted:#71717a;--success:#22c55e;--warning:#eab308;--danger:#ef4444;--border:#27272a;--sidebar-width:260px;--header-height:60px;--bottom-nav-height:64px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:12px;--shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 6px rgba(0,0,0,0.4);--shadow-lg:0 10px 25px rgba(0,0,0,0.5);--shadow-glow:0 0 20px var(--accent-glow)}
 [data-theme="light"]{--bg-primary:#f8fafc;--bg-secondary:#ffffff;--bg-card:#ffffff;--bg-hover:#f1f5f9;--accent-primary:#f59e0b;--accent-secondary:#fb923c;--accent-glow:rgba(245,158,11,0.15);--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--success:#22c55e;--warning:#eab308;--danger:#ef4444;--border:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 25px rgba(0,0,0,0.1)}
@@ -2828,7 +2828,7 @@ window.enterGuestMode = enterGuestMode;
 // Load the remaining Firebase SDK modules. firebase-app and firebase-messaging
 // are loaded in <head>; keep every Firebase module on the same version.
 (function loadFirebaseSDK() {
-    var firebaseVersion = '10.7.1';
+    var firebaseVersion = '12.13.0';
 
     function loadFirestore() {
         var firestoreScript = document.createElement('script');
