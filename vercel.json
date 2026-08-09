@@ -8,6 +8,14 @@
       "source": "/__/firebase/:path*",
       "destination": "https://pt-manager-2b7c5.firebaseapp.com/__/firebase/:path*"
     },
+    {
+      "source": "/__/identitytoolkit/:path*",
+      "destination": "https://identitytoolkit.googleapis.com/:path*"
+    },
+    {
+      "source": "/__/securetoken/:path*",
+      "destination": "https://securetoken.googleapis.com/:path*"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
