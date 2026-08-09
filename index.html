@@ -1079,6 +1079,9 @@ function initFirebase() {
         }
     });
 
+    // Complete a Google sign-in started with signInWithRedirect().
+    auth.getRedirectResult().catch(handleAuthError);
+
     // Initialize FCM
     initFCM();
 }
@@ -1311,16 +1314,44 @@ function clearScheduledNotifications() {
     scheduledNotifications = [];
 }
 
+function isMobileAuthFlow() {
+    const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const narrowViewport = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    return mobileUserAgent || narrowViewport;
+}
+
+function handleAuthError(error) {
+    console.error('Sign in error:', error);
+    const messages = {
+        'auth/unauthorized-domain': 'Domain này chưa được thêm vào Firebase Authorized domains.',
+        'auth/popup-blocked': 'Popup bị chặn, vui lòng thử lại.',
+        'auth/popup-closed-by-user': 'Bạn đã đóng cửa sổ đăng nhập.',
+        'auth/operation-not-supported-in-this-environment': 'Trình duyệt không hỗ trợ popup đăng nhập.'
+    };
+    showToast(messages[error?.code] || 'Đăng nhập thất bại', 'error');
+}
+
 window.signInWithGoogle = function() {
-    if (typeof firebase === 'undefined') {
+    if (typeof firebase === 'undefined' || !firebase.auth) {
         showToast('Đang tải, vui lòng chờ...', 'error');
         return;
     }
+    const auth = firebase.auth();
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).catch((error) => {
-        console.error('Sign in error:', error);
-        showToast('Đăng nhập thất bại', 'error');
-    });
+    const useRedirect = isMobileAuthFlow();
+    const startSignIn = () => {
+        const signInRequest = useRedirect ? auth.signInWithRedirect(provider) : auth.signInWithPopup(provider);
+        return signInRequest.catch((error) => {
+            if (!useRedirect && ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes(error.code)) {
+                showToast('Popup bị chặn, đang chuyển sang trang đăng nhập...', 'success');
+                return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(handleAuthError);
+            }
+            return handleAuthError(error);
+        });
+    };
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(startSignIn)
+        .catch(handleAuthError);
 };
 
 window.signOut = function() {
@@ -2796,14 +2827,6 @@ window.exportReport = exportReport;
 window.sendSingleReminder = sendSingleReminder;
 window.sendAllReminders = sendAllReminders;
 window.enterGuestMode = enterGuestMode;
-
-// Stub functions for Firebase auth (will be replaced when Firebase loads)
-window.signInWithGoogle = function() {
-    showToast('Đang tải đăng nhập...', 'success');
-};
-window.signOut = function() {
-    showToast('Đang tải đăng xuất...', 'success');
-};
 
 // Load Firebase SDK via script tags
 (function loadFirebaseSDK() {
